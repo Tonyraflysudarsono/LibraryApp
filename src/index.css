@@ -1,0 +1,135 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", "Source Sans Pro", -apple-system, sans-serif;
+  --font-display: "Cormorant Garamond", Georgia, serif;
+  
+  --color-bg-base: #ffffff;
+  --color-bg-surface-1: #F5F5F5;
+  --color-bg-surface-2: #E8E8E8;
+  
+  --color-accent-primary: #FA0F00;
+  --color-accent-primary-hover: #E00D00;
+  --color-accent-blue: #0265DC;
+  
+  --color-text-main: #1B1B1B;
+  --color-text-muted: #6E6E6E;
+  
+  --color-border-main: #D3D3D3;
+  
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-pill: 9999px;
+  
+  --animate-duration-fast: 130ms;
+  --animate-duration-base: 250ms;
+  --ease-adobe: cubic-bezier(0.45, 0, 0.40, 1);
+}
+
+/* Base resets & typography */
+html {
+  background-color: var(--color-bg-base);
+  color: var(--color-text-main);
+  scroll-behavior: smooth;
+  font-family: var(--font-sans);
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom scrollbar matching Adobe gray panel colors */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-bg-surface-1);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-main);
+  border-radius: var(--radius-sm);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent-blue);
+}
+
+/* Focus Indicator styling */
+input:focus, button:focus-visible, a:focus-visible {
+  outline: 2px solid var(--color-accent-blue) !important;
+  outline-offset: 2px !important;
+}
+
+/* Card components based on Adobe Spectrum standard layout */
+.adobe-card {
+  background-color: var(--color-bg-base);
+  border: 1px solid var(--color-border-main);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+  transition: border-color var(--animate-duration-base) var(--ease-adobe),
+              box-shadow var(--animate-duration-base) var(--ease-adobe);
+}
+
+.adobe-card:hover {
+  border-color: #a0a0a0;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+/* Button interactive base */
+.adobe-btn {
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  transition: background-color var(--animate-duration-fast) var(--ease-adobe),
+              transform var(--animate-duration-fast) var(--ease-adobe);
+}
+.adobe-btn:active {
+  transform: scale(0.98);
+}
+
+/* Mouse-Move Ambient Blur Blob - Subtle Red Branding */
+.mouse-parallax-blob {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(250, 15, 0, 0.04) 0%, rgba(255, 255, 255, 0) 70%);
+  border-radius: 50%;
+  filter: blur(40px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Reduced Motion Override */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+    transform: none !important;
+  }
+}
+
+/* Hide scrollbars for scrollable layouts like the events carousel */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Active pressed state button feedback for tactile feel */
+.btn-pressable {
+  transition: transform var(--animate-duration-fast) var(--ease-adobe),
+              background-color var(--animate-duration-fast) var(--ease-adobe),
+              box-shadow var(--animate-duration-fast) var(--ease-adobe);
+}
+.btn-pressable:active {
+  transform: scale(0.97);
+}
