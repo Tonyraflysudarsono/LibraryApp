@@ -2,17 +2,13 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Lock, IdentificationCard, WarningCircle } from '@phosphor-icons/react';
 
+import { mockDb } from '../data/mockDb';
+
 interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onLoginSuccess: (user: { name: string; id: string }) => void;
+  onLoginSuccess: (user: { name: string; id: string; role: 'member' | 'admin' }) => void;
 }
-
-const DEMO_USERS = [
-  { id: 'MEM001', name: 'Adrian Wijaya', pass: 'password' },
-  { id: 'MEM002', name: 'Budi Santoso', pass: 'password' },
-  { id: 'MEM003', name: 'Citra Lestari', pass: 'password' }
-];
 
 export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLoginSuccess }) => {
   const [memberId, setMemberId] = useState('');
@@ -26,18 +22,23 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
     setIsLoading(true);
 
     setTimeout(() => {
-      const match = DEMO_USERS.find(
+      const users = mockDb.getUsers();
+      const match = users.find(
         u => u.id.toLowerCase() === memberId.trim().toLowerCase() && u.pass === password
       );
 
       setIsLoading(false);
       if (match) {
-        onLoginSuccess({ name: match.name, id: match.id });
+        if (match.status === 'inactive') {
+          setError('Akun Anda dinonaktifkan oleh administrator.');
+          return;
+        }
+        onLoginSuccess({ name: match.name, id: match.id, role: match.role });
         setMemberId('');
         setPassword('');
         onClose();
       } else {
-        setError('ID Anggota atau password salah. Coba MEM001 / password.');
+        setError('ID atau password salah. Coba MEM001 / password atau ADM001 / password.');
       }
     }, 800);
   };
@@ -153,10 +154,10 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
               </h4>
               <div className="space-y-1 font-mono text-[10px] text-[#6E6E6E]">
                 <p>
-                  ID: <span className="text-[#0265DC] font-bold">MEM001</span> (Adrian Wijaya) - Sandi: password
+                  Anggota: <span className="text-[#0265DC] font-bold">MEM001</span> (Adrian Wijaya) - Sandi: password
                 </p>
                 <p>
-                  ID: <span className="text-[#0265DC] font-bold">MEM002</span> (Budi Santoso) - Sandi: password
+                  Admin: <span className="text-[#FA0F00] font-bold">ADM001</span> (Admin Perpustakaan) - Sandi: password
                 </p>
               </div>
             </div>

@@ -20,7 +20,19 @@ export interface BorrowRequest {
   borrowDate: string;
   dueDate: string;
   returnDate?: string;
+  fine?: number;
   status: 'borrowed' | 'pending_return' | 'returned';
+}
+
+export interface UserAccount {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  pass: string;
+  role: 'member' | 'admin';
+  status: 'active' | 'inactive';
+  joinDate: string;
 }
 
 export interface Bookmark {
@@ -240,6 +252,13 @@ const libraryEvents: LibraryEvent[] = [
   { id: 'e6', title: 'Holiday Community Yard Sale', category: 'COMMUNITY', dateStr: 'Mon, Dec 03', timeStr: '08.00 AM - 04.00 PM', location: 'AtmaLibrary Front Yard', coverSeed: 'yardsale', rotation: -1 }
 ];
 
+const INITIAL_USERS: UserAccount[] = [
+  { id: 'MEM001', name: 'Adrian Wijaya', email: 'adrian@atmalibrary.org', phone: '+62 812-3456-7890', pass: 'password', role: 'member', status: 'active', joinDate: '2025-03-12' },
+  { id: 'MEM002', name: 'Budi Santoso', email: 'budi@atmalibrary.org', phone: '+62 813-4567-8901', pass: 'password', role: 'member', status: 'active', joinDate: '2025-04-15' },
+  { id: 'MEM003', name: 'Citra Lestari', email: 'citra@atmalibrary.org', phone: '+62 814-5678-9012', pass: 'password', role: 'member', status: 'active', joinDate: '2025-05-20' },
+  { id: 'ADM001', name: 'Admin Perpustakaan', email: 'admin@atmalibrary.org', phone: '+62 811-1111-1111', pass: 'password', role: 'admin', status: 'active', joinDate: '2025-01-01' }
+];
+
 const initStorage = () => {
   const storedBooks = localStorage.getItem('lib_books');
   if (!storedBooks) {
@@ -265,6 +284,9 @@ const initStorage = () => {
   }
   if (!localStorage.getItem('lib_space_bookings')) {
     localStorage.setItem('lib_space_bookings', JSON.stringify([]));
+  }
+  if (!localStorage.getItem('lib_users')) {
+    localStorage.setItem('lib_users', JSON.stringify(INITIAL_USERS));
   }
 };
 
@@ -344,11 +366,10 @@ export const mockDb = {
       return { success: false, message: 'Borrow record not found.' };
     }
 
-    borrows[borrowIndex].status = 'returned';
-    borrows[borrowIndex].returnDate = new Date().toISOString().split('T')[0];
+    borrows[borrowIndex].status = 'pending_return';
     localStorage.setItem('lib_borrows', JSON.stringify(borrows));
 
-    return { success: true, message: 'Book returned successfully.' };
+    return { success: true, message: 'Permintaan pengembalian dikirim. Menunggu verifikasi admin.' };
   },
 
   // --- V2 Features ---
@@ -450,5 +471,138 @@ export const mockDb = {
     localStorage.setItem('lib_bookmarks', JSON.stringify([]));
     localStorage.setItem('lib_reservations', JSON.stringify([]));
     localStorage.setItem('lib_space_bookings', JSON.stringify([]));
+    localStorage.setItem('lib_users', JSON.stringify(INITIAL_USERS));
+  },
+
+  // --- Admin Functions ---
+  getUsers: (): UserAccount[] => {
+    initStorage();
+    return JSON.parse(localStorage.getItem('lib_users') || '[]');
+  },
+
+  getMembers: (): UserAccount[] => {
+    initStorage();
+    const users: UserAccount[] = JSON.parse(localStorage.getItem('lib_users') || '[]');
+    return users.filter(u => u.role === 'member');
+  },
+
+  addMember: (member: Omit<UserAccount, 'joinDate'>): { success: boolean; message: string } => {
+    initStorage();
+    const users: UserAccount[] = JSON.parse(localStorage.getItem('lib_users') || '[]');
+    
+    if (users.some(u => u.id.toLowerCase() === member.id.toLowerCase())) {
+      return { success: false, message: 'ID Anggota sudah terdaftar.' };
+    }
+
+    users.push({
+      ...member,
+      joinDate: new Date().toISOString().split('T')[0]
+    });
+    localStorage.setItem('lib_users', JSON.stringify(users));
+    return { success: true, message: 'Anggota baru berhasil didaftarkan.' };
+  },
+
+  updateMember: (member: UserAccount): { success: boolean; message: string } => {
+    initStorage();
+    const users: UserAccount[] = JSON.parse(localStorage.getItem('lib_users') || '[]');
+    const idx = users.findIndex(u => u.id === member.id);
+    if (idx === -1) return { success: false, message: 'Anggota tidak ditemukan.' };
+
+    users[idx] = member;
+    localStorage.setItem('lib_users', JSON.stringify(users));
+    return { success: true, message: 'Data anggota berhasil diperbarui.' };
+  },
+
+  addBook: (book: Omit<Book, 'id'>): { success: boolean; message: string; book?: Book } => {
+    initStorage();
+    const books: Book[] = JSON.parse(localStorage.getItem('lib_books') || '[]');
+    
+    const newId = (books.length > 0 ? Math.max(...books.map(b => parseInt(b.id) || 0)) + 1 : 1).toString();
+    const newBook: Book = {
+      ...book,
+      id: newId
+    };
+
+    books.push(newBook);
+    localStorage.setItem('lib_books', JSON.stringify(books));
+    return { success: true, message: 'Buku baru berhasil ditambahkan.', book: newBook };
+  },
+
+  updateBook: (book: Book): { success: boolean; message: string } => {
+    initStorage();
+    const books: Book[] = JSON.parse(localStorage.getItem('lib_books') || '[]');
+    const idx = books.findIndex(b => b.id === book.id);
+    if (idx === -1) return { success: false, message: 'Buku tidak ditemukan.' };
+
+    books[idx] = book;
+    localStorage.setItem('lib_books', JSON.stringify(books));
+    return { success: true, message: 'Data buku berhasil diperbarui.' };
+  },
+
+  deleteBook: (bookId: string): { success: boolean; message: string } => {
+    initStorage();
+    const books: Book[] = JSON.parse(localStorage.getItem('lib_books') || '[]');
+    const filtered = books.filter(b => b.id !== bookId);
+    if (filtered.length === books.length) return { success: false, message: 'Buku tidak ditemukan.' };
+
+    localStorage.setItem('lib_books', JSON.stringify(filtered));
+    return { success: true, message: 'Buku berhasil dihapus.' };
+  },
+
+  getAllTransactions: (): BorrowRequest[] => {
+    initStorage();
+    return JSON.parse(localStorage.getItem('lib_borrows') || '[]');
+  },
+
+  adminVerifyReturn: (borrowId: string): { success: boolean; message: string; fine?: number } => {
+    initStorage();
+    const borrows: BorrowRequest[] = JSON.parse(localStorage.getItem('lib_borrows') || '[]');
+    const books: Book[] = JSON.parse(localStorage.getItem('lib_books') || '[]');
+    const borrowIndex = borrows.findIndex(b => b.id === borrowId);
+
+    if (borrowIndex === -1) {
+      return { success: false, message: 'Transaksi tidak ditemukan.' };
+    }
+
+    const borrow = borrows[borrowIndex];
+    if (borrow.status === 'returned') {
+      return { success: false, message: 'Buku sudah diverifikasi kembali.' };
+    }
+
+    // Calculate fine (Rp 5.000 per day if overdue)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dueDate = new Date(borrow.dueDate);
+    dueDate.setHours(0, 0, 0, 0);
+
+    let fine = 0;
+    if (today > dueDate) {
+      const diffTime = Math.abs(today.getTime() - dueDate.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      fine = diffDays * 5000;
+    }
+
+    // Update borrow log
+    borrow.status = 'returned';
+    borrow.returnDate = today.toISOString().split('T')[0];
+    borrow.fine = fine;
+    borrows[borrowIndex] = borrow;
+
+    // Update book stock
+    const bookIndex = books.findIndex(b => b.id === borrow.bookId);
+    if (bookIndex !== -1) {
+      books[bookIndex].stock = Math.min(books[bookIndex].stock + 1, books[bookIndex].maxStock);
+    }
+
+    localStorage.setItem('lib_borrows', JSON.stringify(borrows));
+    localStorage.setItem('lib_books', JSON.stringify(books));
+
+    return { 
+      success: true, 
+      message: fine > 0 
+        ? `Pengembalian sukses diverifikasi. Terlambat dikenakan denda Rp ${fine.toLocaleString('id-ID')}` 
+        : 'Pengembalian sukses diverifikasi tanpa denda.', 
+      fine 
+    };
   }
 };

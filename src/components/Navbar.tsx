@@ -3,9 +3,9 @@ import { Books, User, SignOut, Bell, QrCode } from '@phosphor-icons/react';
 
 interface NavbarProps {
   isScrolled: boolean;
-  currentView: 'home' | 'catalog' | 'dashboard' | 'about' | 'events' | 'settings';
-  setCurrentView: (view: 'home' | 'catalog' | 'dashboard' | 'about' | 'events' | 'settings') => void;
-  user: { name: string; id: string } | null;
+  currentView: 'home' | 'catalog' | 'dashboard' | 'about' | 'events' | 'settings' | 'admin_books' | 'admin_members' | 'admin_transactions' | 'admin_reports';
+  setCurrentView: (view: 'home' | 'catalog' | 'dashboard' | 'about' | 'events' | 'settings' | 'admin_books' | 'admin_members' | 'admin_transactions' | 'admin_reports') => void;
+  user: { name: string; id: string; role?: 'member' | 'admin' } | null;
   onLoginClick: () => void;
   onLogout: () => void;
   onQRScannerClick: () => void;
@@ -73,47 +73,95 @@ export const Navbar: React.FC<NavbarProps> = ({
           >
             Beranda
           </button>
-          <button
-            onClick={() => setCurrentView('about')}
-            className={`h-full px-1 border-b-2 flex items-center gap-2 text-xs font-bold transition-all duration-130 ${
-              currentView === 'about'
-                ? 'border-[#FA0F00] text-[#1B1B1B]'
-                : 'border-transparent text-[#6E6E6E] hover:text-[#1B1B1B]'
-            }`}
-          >
-            Tentang Kami
-          </button>
-          <button
-            onClick={() => setCurrentView('events')}
-            className={`h-full px-1 border-b-2 flex items-center gap-2 text-xs font-bold transition-all duration-130 ${
-              currentView === 'events'
-                ? 'border-[#FA0F00] text-[#1B1B1B]'
-                : 'border-transparent text-[#6E6E6E] hover:text-[#1B1B1B]'
-            }`}
-          >
-            Acara
-          </button>
-          <button
-            onClick={() => setCurrentView('catalog')}
-            className={`h-full px-1 border-b-2 flex items-center gap-2 text-xs font-bold transition-all duration-130 ${
-              currentView === 'catalog'
-                ? 'border-[#FA0F00] text-[#1B1B1B]'
-                : 'border-transparent text-[#6E6E6E] hover:text-[#1B1B1B]'
-            }`}
-          >
-            Katalog
-          </button>
-          {user && (
-            <button
-              onClick={() => setCurrentView('dashboard')}
-              className={`h-full px-1 border-b-2 flex items-center gap-2 text-xs font-bold transition-all duration-130 ${
-                currentView === 'dashboard'
-                  ? 'border-[#FA0F00] text-[#1B1B1B]'
-                  : 'border-transparent text-[#6E6E6E] hover:text-[#1B1B1B]'
-              }`}
-            >
-              Pinjaman Saya
-            </button>
+
+          {user && user.role === 'admin' ? (
+            <>
+              <button
+                onClick={() => setCurrentView('admin_books')}
+                className={`h-full px-1 border-b-2 flex items-center gap-2 text-xs font-bold transition-all duration-130 ${
+                  currentView === 'admin_books'
+                    ? 'border-[#FA0F00] text-[#1B1B1B]'
+                    : 'border-transparent text-[#6E6E6E] hover:text-[#1B1B1B]'
+                }`}
+              >
+                Kelola Buku
+              </button>
+              <button
+                onClick={() => setCurrentView('admin_members')}
+                className={`h-full px-1 border-b-2 flex items-center gap-2 text-xs font-bold transition-all duration-130 ${
+                  currentView === 'admin_members'
+                    ? 'border-[#FA0F00] text-[#1B1B1B]'
+                    : 'border-transparent text-[#6E6E6E] hover:text-[#1B1B1B]'
+                }`}
+              >
+                Kelola Anggota
+              </button>
+              <button
+                onClick={() => setCurrentView('admin_transactions')}
+                className={`h-full px-1 border-b-2 flex items-center gap-2 text-xs font-bold transition-all duration-130 ${
+                  currentView === 'admin_transactions'
+                    ? 'border-[#FA0F00] text-[#1B1B1B]'
+                    : 'border-transparent text-[#6E6E6E] hover:text-[#1B1B1B]'
+                }`}
+              >
+                Transaksi & Denda
+              </button>
+              <button
+                onClick={() => setCurrentView('admin_reports')}
+                className={`h-full px-1 border-b-2 flex items-center gap-2 text-xs font-bold transition-all duration-130 ${
+                  currentView === 'admin_reports'
+                    ? 'border-[#FA0F00] text-[#1B1B1B]'
+                    : 'border-transparent text-[#6E6E6E] hover:text-[#1B1B1B]'
+                }`}
+              >
+                Laporan
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => setCurrentView('about')}
+                className={`h-full px-1 border-b-2 flex items-center gap-2 text-xs font-bold transition-all duration-130 ${
+                  currentView === 'about'
+                    ? 'border-[#FA0F00] text-[#1B1B1B]'
+                    : 'border-transparent text-[#6E6E6E] hover:text-[#1B1B1B]'
+                }`}
+              >
+                Tentang Kami
+              </button>
+              <button
+                onClick={() => setCurrentView('events')}
+                className={`h-full px-1 border-b-2 flex items-center gap-2 text-xs font-bold transition-all duration-130 ${
+                  currentView === 'events'
+                    ? 'border-[#FA0F00] text-[#1B1B1B]'
+                    : 'border-transparent text-[#6E6E6E] hover:text-[#1B1B1B]'
+                }`}
+              >
+                Acara
+              </button>
+              <button
+                onClick={() => setCurrentView('catalog')}
+                className={`h-full px-1 border-b-2 flex items-center gap-2 text-xs font-bold transition-all duration-130 ${
+                  currentView === 'catalog'
+                    ? 'border-[#FA0F00] text-[#1B1B1B]'
+                    : 'border-transparent text-[#6E6E6E] hover:text-[#1B1B1B]'
+                }`}
+              >
+                Katalog
+              </button>
+              {user && (
+                <button
+                  onClick={() => setCurrentView('dashboard')}
+                  className={`h-full px-1 border-b-2 flex items-center gap-2 text-xs font-bold transition-all duration-130 ${
+                    currentView === 'dashboard'
+                      ? 'border-[#FA0F00] text-[#1B1B1B]'
+                      : 'border-transparent text-[#6E6E6E] hover:text-[#1B1B1B]'
+                  }`}
+                >
+                  Pinjaman Saya
+                </button>
+              )}
+            </>
           )}
         </div>
 
@@ -127,14 +175,16 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
 
               {/* QR Scanner Trigger */}
-              <button
-                onClick={onQRScannerClick}
-                className="w-8 h-8 rounded-md bg-[#FA0F00]/10 border border-[#FA0F00]/20 flex items-center justify-center text-[#FA0F00] hover:bg-[#FA0F00] hover:text-white transition-all duration-130 btn-pressable shrink-0 relative group"
-                title="Self-Checkout QR Scanner"
-              >
-                <QrCode className="w-4 h-4" weight="bold" />
-                <span className="absolute -bottom-8 bg-[#1B1B1B] text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">Scan Buku</span>
-              </button>
+              {user.role !== 'admin' && (
+                <button
+                  onClick={onQRScannerClick}
+                  className="w-8 h-8 rounded-md bg-[#FA0F00]/10 border border-[#FA0F00]/20 flex items-center justify-center text-[#FA0F00] hover:bg-[#FA0F00] hover:text-white transition-all duration-130 btn-pressable shrink-0 relative group"
+                  title="Self-Checkout QR Scanner"
+                >
+                  <QrCode className="w-4 h-4" weight="bold" />
+                  <span className="absolute -bottom-8 bg-[#1B1B1B] text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">Scan Buku</span>
+                </button>
+              )}
 
               {/* Notifications */}
               <div className="relative" ref={notifRef}>
