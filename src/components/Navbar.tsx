@@ -3,8 +3,8 @@ import { Books, User, SignOut, Bell, QrCode } from '@phosphor-icons/react';
 
 interface NavbarProps {
   isScrolled: boolean;
-  currentView: 'home' | 'catalog' | 'dashboard' | 'about' | 'events';
-  setCurrentView: (view: 'home' | 'catalog' | 'dashboard' | 'about' | 'events') => void;
+  currentView: 'home' | 'catalog' | 'dashboard' | 'about' | 'events' | 'settings';
+  setCurrentView: (view: 'home' | 'catalog' | 'dashboard' | 'about' | 'events' | 'settings') => void;
   user: { name: string; id: string } | null;
   onLoginClick: () => void;
   onLogout: () => void;
@@ -166,10 +166,18 @@ export const Navbar: React.FC<NavbarProps> = ({
                 )}
               </div>
 
-              {/* Profile Icon */}
-              <div className="w-8 h-8 rounded-md bg-[#F5F5F5] border border-[#D3D3D3] flex items-center justify-center text-[#1B1B1B] shrink-0">
+              {/* Profile Icon button */}
+              <button
+                onClick={() => setCurrentView('settings')}
+                className={`w-8 h-8 rounded-md flex items-center justify-center shrink-0 transition-all duration-130 btn-pressable cursor-pointer ${
+                  currentView === 'settings'
+                    ? 'bg-[#FA0F00]/10 border border-[#FA0F00] text-[#FA0F00]'
+                    : 'bg-[#F5F5F5] border border-[#D3D3D3] text-[#1B1B1B] hover:bg-[#E8E8E8]'
+                }`}
+                title="Pengaturan Profil"
+              >
                 <User className="w-3.5 h-3.5" />
-              </div>
+              </button>
               <button
                 onClick={onLogout}
                 className="w-8 h-8 rounded-md bg-[#F5F5F5] border border-[#D3D3D3] flex items-center justify-center text-[#6E6E6E] hover:text-[#1B1B1B] hover:bg-[#E8E8E8] transition-all duration-130 btn-pressable shrink-0"

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion, useMotionValue, useSpring } from 'motion/react';
+import { motion, useMotionValue, useSpring, AnimatePresence, useReducedMotion } from 'motion/react';
 import { Navbar } from './components/Navbar';
 import { LoginModal } from './components/LoginModal';
 import { QRScannerModal } from './components/QRScannerModal';
@@ -29,11 +29,37 @@ const formatEventDate = (dateStr: string) => {
 };
 
 function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'catalog' | 'dashboard' | 'about' | 'events'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'catalog' | 'dashboard' | 'about' | 'events' | 'settings'>('home');
+  const shouldReduceMotion = useReducedMotion();
+
+  const pageVariants = {
+    initial: shouldReduceMotion
+      ? { opacity: 0 }
+      : { opacity: 0, y: 12, filter: "blur(4px)" },
+    animate: { opacity: 1, y: 0, filter: "blur(0px)" },
+    exit: shouldReduceMotion
+      ? { opacity: 0 }
+      : { opacity: 0, y: -8, filter: "blur(4px)" }
+  };
+
+  const pageTransition = shouldReduceMotion
+    ? { duration: 0.2 }
+    : { type: "spring" as const, duration: 0.45, bounce: 0 };
+
   const [globalSearchQuery, setGlobalSearchQuery] = useState('');
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isQROpen, setIsQROpen] = useState(false);
   const [user, setUser] = useState<{ name: string; id: string } | null>(null);
+
+  const [profileData, setProfileData] = useState({
+    name: '',
+    email: 'adrian@atmalibrary.org',
+    phone: '+62 812-3456-7890',
+    memberTier: 'Premium Reader',
+    joinDate: '12 Maret 2025',
+    whatsappNotif: true,
+    emailNotif: false
+  });
   
   const [books, setBooks] = useState<Book[]>([]);
   const [borrows, setBorrows] = useState<BorrowRequest[]>([]);
@@ -78,13 +104,17 @@ function App() {
   useEffect(() => {
     if (user) {
       setBorrows(mockDb.getBorrowRequests(user.id));
+      setProfileData(prev => ({
+        ...prev,
+        name: user.name
+      }));
     } else {
       setBorrows([]);
-      if (currentView === 'dashboard') {
+      if (currentView === 'dashboard' || currentView === 'settings') {
         setCurrentView('home');
       }
     }
-  }, [user]);
+  }, [user, currentView]);
 
   const fetchData = () => {
     setBooks(mockDb.getBooks());
@@ -125,6 +155,36 @@ function App() {
     alert(`Terima kasih! Pendaftaran RSVP Anda untuk "${evtTitle}" telah berhasil.`);
   };
 
+  const handleSaveProfile = (updatedName: string, updatedEmail: string, updatedPhone: string, whatsappNotif: boolean, emailNotif: boolean) => {
+    if (user) {
+      const updatedUser = { ...user, name: updatedName };
+      setUser(updatedUser);
+      localStorage.setItem('lib_session_user', JSON.stringify(updatedUser));
+      setProfileData(prev => ({
+        ...prev,
+        name: updatedName,
+        email: updatedEmail,
+        phone: updatedPhone,
+        whatsappNotif,
+        emailNotif
+      }));
+      alert('Perubahan profil berhasil disimpan!');
+    }
+  };
+
+  const handlePasswordReset = (currentPass: string, newPass: string, confirmPass: string) => {
+    if (!currentPass || !newPass || !confirmPass) {
+      alert('Semua kolom kata sandi wajib diisi!');
+      return false;
+    }
+    if (newPass !== confirmPass) {
+      alert('Konfirmasi kata sandi baru tidak cocok!');
+      return false;
+    }
+    alert('Kata sandi Anda telah berhasil diubah!');
+    return true;
+  };
+
   return (
     <main 
       onPointerMove={handlePointerMove}
@@ -148,9 +208,17 @@ function App() {
           onQRScannerClick={() => setIsQROpen(true)}
         />
 
-        {/* --- RESTORED HOME PAGE --- */}
-        {currentView === 'home' && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <AnimatePresence mode="wait">
+          {/* --- RESTORED HOME PAGE --- */}
+          {currentView === 'home' && (
+            <motion.div
+              key="home"
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={pageTransition}
+            >
             {/* Wix-inspired Split Hero Section */}
             <section className="w-full bg-[#FAF6F0] py-16 relative z-10">
               <div className="max-w-7xl mx-auto px-6 relative">
@@ -548,12 +616,20 @@ function App() {
                 <div className="absolute bottom-[-6px] left-[20px] w-3 h-3 bg-white border-r border-b border-[#D3D3D3] rotate-45" />
               </div>
             </section>
-          </div>
-        )}
+            </motion.div>
+          )}
 
-        {/* --- ABOUT PAGE --- */}
-        {currentView === 'about' && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 font-sans">
+          {/* --- ABOUT PAGE --- */}
+          {currentView === 'about' && (
+            <motion.div
+              key="about"
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={pageTransition}
+              className="font-sans"
+            >
             {/* About Us Split Header Section */}
             <section className="w-full bg-[#FAF6F0] py-16 relative z-10">
               <div className="max-w-7xl mx-auto px-6 relative">
@@ -804,12 +880,20 @@ function App() {
                 <div className="absolute bottom-[-6px] left-[20px] w-3 h-3 bg-white border-r border-b border-[#D3D3D3] rotate-45" />
               </div>
             </section>
-          </div>
-        )}
+            </motion.div>
+          )}
 
-        {/* --- EVENTS PAGE --- */}
-        {currentView === 'events' && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 font-sans">
+          {/* --- EVENTS PAGE --- */}
+          {currentView === 'events' && (
+            <motion.div
+              key="events"
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={pageTransition}
+              className="font-sans"
+            >
             {/* Header Section */}
             <section className="w-full bg-[#FAF6F0] py-20 text-center relative z-10">
               <div className="max-w-4xl mx-auto px-6">
@@ -1031,13 +1115,20 @@ function App() {
                 <div className="absolute bottom-[-6px] left-[20px] w-3 h-3 bg-white border-r border-b border-[#D3D3D3] rotate-45" />
               </div>
             </section>
-          </div>
-        )}
+            </motion.div>
+          )}
 
-        {/* Main Catalog View */}
-        {(currentView === 'catalog' || currentView === 'dashboard') && (
-          <section className="relative z-10 bg-[#F5F5F5] min-h-screen">
-            {currentView === 'catalog' && (
+          {/* Main Catalog View */}
+          {currentView === 'catalog' && (
+            <motion.div
+              key="catalog"
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={pageTransition}
+              className="relative z-10 bg-[#F5F5F5] min-h-screen"
+            >
               <BookCatalog
                 books={books}
                 user={user}
@@ -1047,8 +1138,20 @@ function App() {
                 globalSearchQuery={globalSearchQuery}
                 setGlobalSearchQuery={setGlobalSearchQuery}
               />
-            )}
-            {currentView === 'dashboard' && (
+            </motion.div>
+          )}
+
+          {/* Member Dashboard View */}
+          {currentView === 'dashboard' && (
+            <motion.div
+              key="dashboard"
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={pageTransition}
+              className="relative z-10 bg-[#F5F5F5] min-h-screen"
+            >
               <MemberDashboard
                 user={user}
                 borrows={borrows}
@@ -1056,9 +1159,420 @@ function App() {
                 onBrowseBooks={() => setCurrentView('catalog')}
                 refreshBorrows={fetchData}
               />
-            )}
-          </section>
+            </motion.div>
+          )}
+
+          {/* Member Settings View */}
+          {currentView === 'settings' && (
+            <motion.div
+              key="settings"
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={pageTransition}
+            >
+              {/* Header Section */}
+              <section className="w-full bg-[#FAF6F0] py-20 text-center relative z-10">
+                <div className="max-w-4xl mx-auto px-6">
+                  <span className="rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.2em] font-medium bg-[#3D1E1E]/10 text-[#3D1E1E] mb-3 inline-block">
+                    Pengaturan Akun
+                  </span>
+                  <h1 className="font-display font-medium text-5xl md:text-6xl text-[#3D1E1E] mb-6">
+                    Profile Settings
+                  </h1>
+                  <div className="w-12 h-[2px] bg-[#3D1E1E] mx-auto mb-6" />
+                  <p className="text-sm md:text-base text-[#6E6E6E] max-w-xl mx-auto font-medium leading-relaxed">
+                    Perbarui informasi profil Anda, ubah kata sandi, dan kelola preferensi notifikasi peminjaman buku.
+                  </p>
+                </div>
+              </section>
+
+              <div className="max-w-5xl mx-auto border-t border-[#D3D3D3]" />
+
+              {/* Content Section */}
+              <section className="w-full bg-white py-16 relative z-20">
+                <div className="max-w-6xl mx-auto px-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    
+                    {/* Left Column - User Summary Bezel Card */}
+                    <div className="lg:col-span-4 space-y-6">
+                      <div className="border border-[#3D1E1E]/15 bg-[#3D1E1E]/5 p-2 rounded-2xl">
+                        <div className="bg-[#FAF6F0] border border-[#3D1E1E] p-8 rounded-[calc(1rem-2px)] text-center">
+                          {/* Avatar editing circle */}
+                          <div className="relative w-28 h-28 mx-auto mb-6 rounded-full overflow-hidden border-2 border-[#3D1E1E] bg-white group">
+                            <img
+                              src={`https://api.dicebear.com/7.x/adventurer/svg?seed=${profileData.name || 'Adrian'}`}
+                              alt="Avatar"
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[10px] font-bold uppercase tracking-wider cursor-pointer">
+                              Ubah
+                            </div>
+                          </div>
+                          
+                          {/* Username & Tier */}
+                          <h3 className="font-display font-medium text-2xl text-[#3D1E1E] mb-1">
+                            {profileData.name}
+                          </h3>
+                          <span className="inline-block rounded-full bg-[#FA0F00]/10 border border-[#FA0F00]/30 text-[#FA0F00] text-[10px] font-bold tracking-wider px-3 py-0.5 uppercase mb-6">
+                            {profileData.memberTier}
+                          </span>
+
+                          {/* Quick Stats Grid */}
+                          <div className="grid grid-cols-2 gap-4 border-t border-[#3D1E1E]/20 pt-6 text-left">
+                            <div>
+                              <p className="text-[9px] font-mono uppercase tracking-wider text-[#6E6E6E] mb-0.5">ID Anggota</p>
+                              <p className="text-xs font-bold text-[#1B1B1B] font-mono">{user?.id || 'M-001'}</p>
+                            </div>
+                            <div>
+                              <p className="text-[9px] font-mono uppercase tracking-wider text-[#6E6E6E] mb-0.5">Terdaftar Sejak</p>
+                              <p className="text-xs font-bold text-[#1B1B1B]">{profileData.joinDate}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Member Limit Alert */}
+                      <div className="border border-[#3D1E1E]/15 bg-[#3D1E1E]/5 p-2 rounded-2xl">
+                        <div className="bg-white border border-[#3D1E1E] p-6 rounded-[calc(1rem-2px)] text-left space-y-3">
+                          <h4 className="text-xs font-bold uppercase tracking-wider text-[#1B1B1B]">Limit Sirkulasi</h4>
+                          <div className="w-full bg-[#E8E8E8] h-1.5 rounded-full overflow-hidden">
+                            <div className="bg-[#FA0F00] h-full rounded-full" style={{ width: '33%' }}></div>
+                          </div>
+                          <p className="text-[11px] text-[#6E6E6E] leading-relaxed">
+                            Anda sedang meminjam **1 dari 3** batas maksimal buku yang diperbolehkan.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right Column - Forms Bento */}
+                    <div className="lg:col-span-8 space-y-8">
+                      {/* Bezel 1: Personal Details */}
+                      <div className="border border-[#3D1E1E]/15 bg-[#3D1E1E]/5 p-2 rounded-2xl">
+                        <div className="bg-white border border-[#3D1E1E] p-8 rounded-[calc(1rem-2px)] text-left">
+                          <h3 className="font-display font-medium text-2xl text-[#3D1E1E] mb-6 pb-2 border-b border-[#F0F0F0]">
+                            Detail Pribadi
+                          </h3>
+                          
+                          <form onSubmit={(e) => {
+                            e.preventDefault();
+                            const formData = new FormData(e.currentTarget);
+                            const name = formData.get('name') as string;
+                            const email = formData.get('email') as string;
+                            const phone = formData.get('phone') as string;
+                            const whatsappNotif = formData.get('whatsappNotif') === 'on';
+                            const emailNotif = formData.get('emailNotif') === 'on';
+                            handleSaveProfile(name, email, phone, whatsappNotif, emailNotif);
+                          }} className="space-y-6">
+                            
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                              <div>
+                                <label className="block text-[11px] font-mono text-[#6E6E6E] uppercase tracking-wider mb-2">Nama Lengkap *</label>
+                                <input
+                                  required
+                                  name="name"
+                                  type="text"
+                                  defaultValue={profileData.name}
+                                  className="w-full bg-[#FAF9F9] border border-[#D3D3D3] rounded-sm py-2.5 px-4 text-sm text-[#1B1B1B] focus:border-[#FA0F00] focus:bg-white outline-none transition-all"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[11px] font-mono text-[#6E6E6E] uppercase tracking-wider mb-2">Alamat Email *</label>
+                                <input
+                                  required
+                                  name="email"
+                                  type="email"
+                                  defaultValue={profileData.email}
+                                  className="w-full bg-[#FAF9F9] border border-[#D3D3D3] rounded-sm py-2.5 px-4 text-sm text-[#1B1B1B] focus:border-[#FA0F00] focus:bg-white outline-none transition-all"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                              <div>
+                                <label className="block text-[11px] font-mono text-[#6E6E6E] uppercase tracking-wider mb-2">Nomor Telepon</label>
+                                <input
+                                  name="phone"
+                                  type="text"
+                                  defaultValue={profileData.phone}
+                                  className="w-full bg-[#FAF9F9] border border-[#D3D3D3] rounded-sm py-2.5 px-4 text-sm text-[#1B1B1B] focus:border-[#FA0F00] focus:bg-white outline-none transition-all"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[11px] font-mono text-[#6E6E6E] uppercase tracking-wider mb-2">Tingkat Keanggotaan</label>
+                                <input
+                                  disabled
+                                  type="text"
+                                  value={profileData.memberTier}
+                                  className="w-full bg-[#F5F5F5] border border-[#E8E8E8] rounded-sm py-2.5 px-4 text-sm text-[#6E6E6E] outline-none cursor-not-allowed"
+                                />
+                              </div>
+                            </div>
+
+                            {/* Preferences Checkbox switches */}
+                            <div className="pt-4 border-t border-[#F0F0F0] space-y-4">
+                              <h4 className="text-[11px] font-mono text-[#6E6E6E] uppercase tracking-wider mb-2">Preferensi Notifikasi</h4>
+                              
+                              <div className="flex items-center justify-between py-2">
+                                <div>
+                                  <p className="text-xs font-bold text-[#1B1B1B]">WhatsApp Alerts</p>
+                                  <p className="text-[10px] text-[#6E6E6E]">Terima pengingat jatuh tempo sirkulasi via WhatsApp.</p>
+                                </div>
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                  <input name="whatsappNotif" type="checkbox" defaultChecked={profileData.whatsappNotif} className="sr-only peer" />
+                                  <div className="w-9 h-5 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D3D3D3] after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#FA0F00]"></div>
+                                </label>
+                              </div>
+
+                              <div className="flex items-center justify-between py-2">
+                                <div>
+                                  <p className="text-xs font-bold text-[#1B1B1B]">Email Newsletter</p>
+                                  <p className="text-[10px] text-[#6E6E6E]">Dapatkan rekomendasi buku mingguan dan rilis event baru.</p>
+                                </div>
+                                <label className="relative inline-flex items-center cursor-pointer">
+                                  <input name="emailNotif" type="checkbox" defaultChecked={profileData.emailNotif} className="sr-only peer" />
+                                  <div className="w-9 h-5 bg-[#E8E8E8] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[#D3D3D3] after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#FA0F00]"></div>
+                                </label>
+                              </div>
+                            </div>
+
+                            {/* Save Button-in-Button */}
+                            <div className="pt-6 border-t border-[#F0F0F0] flex justify-end">
+                              <button
+                                type="submit"
+                                className="group bg-[#FA0F00] hover:bg-[#E00D00] text-white pl-6 pr-2 py-2 rounded-full text-xs font-semibold uppercase tracking-wider shadow-sm transition-all duration-300 btn-pressable flex items-center gap-3 cursor-pointer"
+                              >
+                                <span>Simpan Profil</span>
+                                <div className="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center text-white transition-all duration-300 group-hover:scale-105">
+                                  <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 256 256">
+                                    <path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"/>
+                                  </svg>
+                                </div>
+                              </button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+
+                      {/* Bezel 2: Password Update */}
+                      <div className="border border-[#3D1E1E]/15 bg-[#3D1E1E]/5 p-2 rounded-2xl">
+                        <div className="bg-white border border-[#3D1E1E] p-8 rounded-[calc(1rem-2px)] text-left">
+                          <h3 className="font-display font-medium text-2xl text-[#3D1E1E] mb-6 pb-2 border-b border-[#F0F0F0]">
+                            Ubah Kata Sandi
+                          </h3>
+                          
+                          <form onSubmit={(e) => {
+                            e.preventDefault();
+                            const formData = new FormData(e.currentTarget);
+                            const currentPass = formData.get('currentPass') as string;
+                            const newPass = formData.get('newPass') as string;
+                            const confirmPass = formData.get('confirmPass') as string;
+                            const success = handlePasswordReset(currentPass, newPass, confirmPass);
+                            if (success) {
+                              e.currentTarget.reset();
+                            }
+                          }} className="space-y-6">
+                            <div>
+                              <label className="block text-[11px] font-mono text-[#6E6E6E] uppercase tracking-wider mb-2">Kata Sandi Sekarang *</label>
+                              <input
+                                required
+                                name="currentPass"
+                                type="password"
+                                className="w-full bg-[#FAF9F9] border border-[#D3D3D3] rounded-sm py-2.5 px-4 text-sm text-[#1B1B1B] focus:border-[#FA0F00] focus:bg-white outline-none transition-all"
+                              />
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                              <div>
+                                <label className="block text-[11px] font-mono text-[#6E6E6E] uppercase tracking-wider mb-2">Kata Sandi Baru *</label>
+                                <input
+                                  required
+                                  name="newPass"
+                                  type="password"
+                                  className="w-full bg-[#FAF9F9] border border-[#D3D3D3] rounded-sm py-2.5 px-4 text-sm text-[#1B1B1B] focus:border-[#FA0F00] focus:bg-white outline-none transition-all"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[11px] font-mono text-[#6E6E6E] uppercase tracking-wider mb-2">Konfirmasi Kata Sandi Baru *</label>
+                                <input
+                                  required
+                                  name="confirmPass"
+                                  type="password"
+                                  className="w-full bg-[#FAF9F9] border border-[#D3D3D3] rounded-sm py-2.5 px-4 text-sm text-[#1B1B1B] focus:border-[#FA0F00] focus:bg-white outline-none transition-all"
+                                />
+                              </div>
+                            </div>
+
+                            {/* Save Button-in-Button */}
+                            <div className="pt-6 border-t border-[#F0F0F0] flex justify-end">
+                              <button
+                                type="submit"
+                                className="group bg-[#3D1E1E] hover:bg-[#2A1515] text-white pl-6 pr-2 py-2 rounded-full text-xs font-semibold uppercase tracking-wider shadow-sm transition-all duration-300 btn-pressable flex items-center gap-3 cursor-pointer"
+                              >
+                                <span>Perbarui Kata Sandi</span>
+                                <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-white transition-all duration-300 group-hover:scale-105">
+                                  <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 256 256">
+                                    <path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192A88,88,0,1,1,216,128,88.1,88.1,0,0,1,128,216Zm12-88a12,12,0,1,1-12-12A12,12,0,0,1,140,128Z"/>
+                                  </svg>
+                                </div>
+                              </button>
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </section>
+
+              <div className="max-w-5xl mx-auto border-t border-[#D3D3D3]" />
+
+              {/* Wix-inspired Contact Section */}
+              <section className="w-full bg-[#FAF9F9] py-24 relative z-20">
+                <div className="max-w-6xl mx-auto px-6 relative">
+                  {/* Floating Donate button right side */}
+                  <div className="absolute top-0 right-6 z-20 hidden md:block">
+                    <div className="w-24 h-24 rounded-full border border-[#FA0F00] bg-white hover:bg-[#FA0F00] text-[#FA0F00] hover:text-white flex flex-col items-center justify-center text-[10px] uppercase font-bold tracking-widest shadow-lg cursor-pointer transition-all duration-300 btn-pressable">
+                      <span>Donate</span>
+                    </div>
+                  </div>
+
+                  <div className="text-center md:text-left mb-16 max-w-2xl">
+                    <h2 className="font-display font-bold text-4xl text-[#1B1B1B] tracking-tight mb-4">
+                      Contact
+                    </h2>
+                    <p className="text-sm text-[#6E6E6E] font-medium leading-relaxed">
+                      Hubungi kami untuk mempelajari lebih lanjut tentang rilis koleksi buku terbaru, event virtual, serta layanan peminjaman sirkulasi mandiri digital.
+                    </p>
+                  </div>
+
+                  {/* 3-Column Layout */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-12">
+                    {/* Col 1: Address */}
+                    <div className="md:col-span-3 text-left">
+                      <h3 className="font-display font-bold text-lg text-[#1B1B1B] mb-6 tracking-wide">
+                        Address
+                      </h3>
+                      <p className="text-sm text-[#6E6E6E] leading-relaxed font-medium mb-6">
+                        Jl. Babarsari No.44, <br />
+                        Janti, Caturtunggal, Depok, <br />
+                        Sleman, Yogyakarta 55281
+                      </p>
+                      <p className="text-sm text-[#6E6E6E] leading-relaxed font-medium">
+                        Telp: 123-456-7890 <br />
+                        Email: info@atmalibrary.org
+                      </p>
+                    </div>
+
+                    {/* Col 2: Opening Hours & Socials */}
+                    <div className="md:col-span-3 text-left">
+                      <h3 className="font-display font-bold text-lg text-[#1B1B1B] mb-6 tracking-wide">
+                        Opening Hours
+                      </h3>
+                      <p className="text-sm text-[#6E6E6E] leading-relaxed font-medium mb-8">
+                        Mon - Fri: 8am - 8pm <br />
+                        Saturday: 9am - 7pm <br />
+                        Sunday: 9am - 8pm
+                      </p>
+                      
+                      {/* Social Icons */}
+                      <div className="flex gap-4 items-center">
+                        <a href="#" className="w-8 h-8 rounded-full border border-[#D3D3D3] hover:border-[#FA0F00] hover:text-[#FA0F00] flex items-center justify-center text-[#6E6E6E] transition-all">
+                          <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                            <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/>
+                          </svg>
+                        </a>
+                        <a href="#" className="w-8 h-8 rounded-full border border-[#D3D3D3] hover:border-[#FA0F00] hover:text-[#FA0F00] flex items-center justify-center text-[#6E6E6E] transition-all">
+                          <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                        </svg>
+                      </a>
+                      <a href="#" className="w-8 h-8 rounded-full border border-[#D3D3D3] hover:border-[#FA0F00] hover:text-[#FA0F00] flex items-center justify-center text-[#6E6E6E] transition-all">
+                        <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                        </svg>
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Col 3: Ask Us Anything Form */}
+                  <div className="md:col-span-6 text-left">
+                    <h3 className="font-display font-bold text-lg text-[#1B1B1B] mb-6 tracking-wide">
+                      Ask Us Anything
+                    </h3>
+                    <form onSubmit={(e) => { e.preventDefault(); alert('Pesan Anda telah terkirim. Terima kasih!'); }} className="space-y-6">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                          <label className="block text-[11px] font-mono text-[#6E6E6E] uppercase tracking-wider mb-1">First Name *</label>
+                          <input required type="text" className="w-full bg-transparent border-b border-[#D3D3D3] focus:border-[#FA0F00] transition-colors py-2 text-sm text-[#1B1B1B] outline-none" />
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-mono text-[#6E6E6E] uppercase tracking-wider mb-1">Last Name *</label>
+                          <input required type="text" className="w-full bg-transparent border-b border-[#D3D3D3] focus:border-[#FA0F00] transition-colors py-2 text-sm text-[#1B1B1B] outline-none" />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                          <label className="block text-[11px] font-mono text-[#6E6E6E] uppercase tracking-wider mb-1">Email *</label>
+                          <input required type="email" className="w-full bg-transparent border-b border-[#D3D3D3] focus:border-[#FA0F00] transition-colors py-2 text-sm text-[#1B1B1B] outline-none" />
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-mono text-[#6E6E6E] uppercase tracking-wider mb-1">Subject</label>
+                          <input type="text" className="w-full bg-transparent border-b border-[#D3D3D3] focus:border-[#FA0F00] transition-colors py-2 text-sm text-[#1B1B1B] outline-none" />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-mono text-[#6E6E6E] uppercase tracking-wider mb-1">Leave us a message...</label>
+                        <textarea rows={3} className="w-full bg-transparent border-b border-[#D3D3D3] focus:border-[#FA0F00] transition-colors py-2 text-sm text-[#1B1B1B] outline-none resize-none" />
+                      </div>
+
+                      <button type="submit" className="bg-[#FA0F00] hover:bg-[#E00D00] text-white px-8 py-3 rounded-sm text-xs font-semibold uppercase tracking-wider shadow-sm transition-all duration-130 btn-pressable">
+                        Submit
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <div className="max-w-5xl mx-auto border-t border-[#D3D3D3]" />
+
+            {/* Wix-inspired Location Map Section */}
+            <section className="w-full relative z-20 h-[450px] overflow-hidden">
+              {/* OpenStreetMap iframe */}
+              <iframe 
+                src="https://www.openstreetmap.org/export/embed.html?bbox=110.4130%2C-7.7835%2C110.4190%2C-7.7785&amp;layer=mapnik"
+                title="AtmaLibrary Location Map"
+                className="w-full h-full border-none grayscale contrast-115 hover:grayscale-0 transition-all duration-700 ease-in-out"
+              />
+
+              {/* Location Pin Overlay Popup */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[120px] bg-white border border-[#D3D3D3] p-4 pr-10 shadow-xl rounded-sm z-30 min-w-[200px]">
+                <button 
+                  onClick={(e) => { e.currentTarget.parentElement?.remove(); }}
+                  className="absolute top-2 right-2 text-[#9E9E9E] hover:text-[#1B1B1B] text-xs font-bold font-mono transition-colors"
+                  title="Close"
+                >
+                  ✕
+                </button>
+                <h4 className="font-display font-bold text-xs uppercase tracking-widest text-[#FA0F00] mb-1">
+                  ATMA LIBRARY
+                </h4>
+                <p className="text-[10px] font-mono font-bold text-[#6E6E6E]">
+                  Yogyakarta, Indonesia
+                </p>
+                {/* Marker indicator triangle pointing down */}
+                <div className="absolute bottom-[-6px] left-[20px] w-3 h-3 bg-white border-r border-b border-[#D3D3D3] rotate-45" />
+              </div>
+            </section>
+          </motion.div>
         )}
+      </AnimatePresence>
       </div>
 
       {/* Main Footer */}
