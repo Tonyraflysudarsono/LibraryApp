@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Lock, IdentificationCard, WarningCircle } from '@phosphor-icons/react';
 
-import { mockDb } from '../data/mockDb';
+import { authService } from '../services/authService';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -16,31 +16,27 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
-    setTimeout(() => {
-      const users = mockDb.getUsers();
-      const match = users.find(
-        u => u.id.toLowerCase() === memberId.trim().toLowerCase() && u.pass === password
-      );
-
+    try {
+      const response = await authService.login(memberId.trim(), password);
       setIsLoading(false);
-      if (match) {
-        if (match.status === 'inactive') {
-          setError('Akun Anda dinonaktifkan oleh administrator.');
-          return;
-        }
-        onLoginSuccess({ name: match.name, id: match.id, role: match.role });
-        setMemberId('');
-        setPassword('');
-        onClose();
-      } else {
-        setError('ID atau password salah. Coba MEM001 / password atau ADM001 / password.');
-      }
-    }, 800);
+      onLoginSuccess({
+        name: response.user.name,
+        id: response.user.id,
+        role: response.user.role,
+      });
+      setMemberId('');
+      setPassword('');
+      onClose();
+    } catch (err: any) {
+      setIsLoading(false);
+      const errMsg = err.response?.data?.message || 'ID atau password salah. Coba MEM001 / password atau ADM001 / password.';
+      setError(errMsg);
+    }
   };
 
   return (

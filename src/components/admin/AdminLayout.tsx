@@ -16,12 +16,13 @@ import {
   List,
   X,
   Package,
-  Buildings
+  Buildings,
+  UsersThree
 } from '@phosphor-icons/react';
 
 interface AdminLayoutProps {
-  currentView: 'admin_dashboard' | 'admin_books' | 'admin_members' | 'admin_transactions' | 'admin_reports' | 'admin_stock' | 'admin_supply';
-  setCurrentView: (view: 'admin_dashboard' | 'admin_books' | 'admin_members' | 'admin_transactions' | 'admin_reports' | 'admin_stock' | 'admin_supply') => void;
+  currentView: 'admin_dashboard' | 'admin_books' | 'admin_members' | 'admin_transactions' | 'admin_reports' | 'admin_stock' | 'admin_supply' | 'admin_hr';
+  setCurrentView: (view: 'admin_dashboard' | 'admin_books' | 'admin_members' | 'admin_transactions' | 'admin_reports' | 'admin_stock' | 'admin_supply' | 'admin_hr') => void;
   user: { name: string; id: string; role?: 'member' | 'admin' } | null;
   onLogout: () => void;
   children: React.ReactNode;
@@ -53,6 +54,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
       case 'admin_reports': return 'Settings & Reports';
       case 'admin_stock': return 'Stock Management';
       case 'admin_supply': return 'Supply & Acquisition';
+      case 'admin_hr': return 'HR Dashboard';
       default: return 'Admin Panel';
     }
   };
@@ -211,6 +213,21 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
             <div className="flex items-center gap-3">
               <Users className={`w-4.5 h-4.5 ${currentView === 'admin_members' ? 'text-white' : 'text-[#6E6E6E] group-hover:text-[#1B1B1B]'}`} />
               <span>Members</span>
+            </div>
+          </button>
+
+          {/* HR Dashboard Button (Top-Level) */}
+          <button
+            onClick={() => handleNavClick('admin_hr')}
+            className={`flex items-center justify-between w-full rounded-xl py-3 px-4 text-xs font-semibold tracking-wide transition-all duration-150 group mt-0.5 ${
+              currentView === 'admin_hr' 
+                ? 'bg-[#FA5A3C] text-white shadow-sm' 
+                : 'text-[#6E6E6E] hover:bg-[#F8F9FA] hover:text-[#1B1B1B]'
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <UsersThree className={`w-4.5 h-4.5 ${currentView === 'admin_hr' ? 'text-white' : 'text-[#6E6E6E] group-hover:text-[#1B1B1B]'}`} />
+              <span>HR Dashboard</span>
             </div>
           </button>
 

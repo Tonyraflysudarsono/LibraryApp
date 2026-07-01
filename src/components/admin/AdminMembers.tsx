@@ -21,7 +21,7 @@ import type { UserAccount } from '../../data/mockDb';
 
 interface AdminMembersProps {
   members: UserAccount[];
-  handleRegisterMember: (e: React.FormEvent, memberData: any) => boolean;
+  handleRegisterMember: (e: React.FormEvent, memberData: any) => Promise<boolean> | boolean;
   handleToggleMemberStatus: (member: UserAccount) => void;
 }
 
@@ -186,7 +186,7 @@ export const AdminMembers: React.FC<AdminMembersProps> = ({
     currentPage * itemsPerPage
   );
 
-  const handleAddMemberSubmit = (e: React.FormEvent) => {
+  const handleAddMemberSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Generate a new sequential Member ID
@@ -204,7 +204,7 @@ export const AdminMembers: React.FC<AdminMembersProps> = ({
       membershipType: newMember.membershipType
     };
 
-    const success = handleRegisterMember(e, memberPayload);
+    const success = await handleRegisterMember(e, memberPayload);
     if (success) {
       // Clear form
       setNewMember({

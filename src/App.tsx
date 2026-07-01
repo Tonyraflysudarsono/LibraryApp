@@ -17,11 +17,19 @@ import { AdminTransactions } from './components/admin/AdminTransactions';
 import { AdminReports } from './components/admin/AdminReports';
 import { AdminStock } from './components/admin/AdminStock';
 import { AdminSupply } from './components/admin/AdminSupply';
+import { AdminHR } from './components/admin/AdminHR';
 import { mockDb } from './data/mockDb';
-import type { Book, BorrowRequest, LibraryEvent, UserAccount } from './data/mockDb';
+import type { LibraryEvent, UserAccount } from './data/mockDb';
+
+import { bukuService } from './services/bukuService';
+import type { Book } from './services/bukuService';
+import { anggotaService } from './services/anggotaService';
+import { peminjamanService } from './services/peminjamanService';
+import type { BorrowRequest } from './services/peminjamanService';
+import { authService } from './services/authService';
 
 function App() {
-  const [currentView, setCurrentView] = useState<'home' | 'catalog' | 'dashboard' | 'about' | 'events' | 'settings' | 'admin_dashboard' | 'admin_books' | 'admin_members' | 'admin_transactions' | 'admin_reports' | 'admin_stock' | 'admin_supply'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'catalog' | 'dashboard' | 'about' | 'events' | 'settings' | 'admin_dashboard' | 'admin_books' | 'admin_members' | 'admin_transactions' | 'admin_reports' | 'admin_stock' | 'admin_supply' | 'admin_hr'>('home');
   const shouldReduceMotion = useReducedMotion();
 
   const pageVariants = {
@@ -85,7 +93,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('lib_session_user');
+    const savedUser = localStorage.getItem('lib_user');
     if (savedUser) {
       setUser(JSON.parse(savedUser));
     }
@@ -116,19 +124,40 @@ function App() {
     }
   }, [user, currentView]);
 
-  const fetchData = () => {
-    setBooks(mockDb.getBooks());
-    setEvents(mockDb.getEvents());
-    setMembers(mockDb.getMembers());
-    setAllTransactions(mockDb.getAllTransactions());
-    if (user) {
-      setBorrows(mockDb.getBorrowRequests(user.id));
+  const fetchData = async () => {
+    try {
+      const fetchedBooks = await bukuService.getAllBooks();
+      setBooks(fetchedBooks as any);
+      
+      // Events remain mock data as there is no events table in PDM
+      setEvents(mockDb.getEvents());
+
+      if (user) {
+        if (user.role === 'admin') {
+          const [fetchedMembers, fetchedTransactions] = await Promise.all([
+            anggotaService.getAllMembers(),
+            peminjamanService.getAllTransactions(),
+          ]);
+          setMembers(fetchedMembers as any);
+          setAllTransactions(fetchedTransactions as any);
+        } else {
+          const fetchedBorrows = await peminjamanService.getAllTransactions(user.id);
+          setBorrows(fetchedBorrows as any);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching library data:', error);
     }
   };
 
   const handleLoginSuccess = (loggedInUser: { name: string; id: string; role?: 'member' | 'admin' }) => {
     setUser(loggedInUser);
-    localStorage.setItem('lib_session_user', JSON.stringify(loggedInUser));
+    localStorage.setItem('lib_user', JSON.stringify({
+      id: loggedInUser.id,
+      name: loggedInUser.name,
+      role: loggedInUser.role,
+      status: 'active'
+    }));
     if (loggedInUser.role === 'admin') {
       setCurrentView('admin_dashboard');
     } else {
@@ -138,45 +167,70 @@ function App() {
 
   const handleLogout = () => {
     setUser(null);
-    localStorage.removeItem('lib_session_user');
+    authService.logout();
     setCurrentView('home');
   };
 
-  const handleBorrow = (bookId: string) => {
+  const handleBorrow = async (bookId: string) => {
     if (!user) return { success: false, message: 'Please log in first.' };
-    const res = mockDb.borrowBook(bookId, user.id);
-    if (res.success) {
-      fetchData();
+    try {
+      await peminjamanService.createTransaction(user.id, bookId);
+      await fetchData();
+      return { success: true, message: 'Buku berhasil dipinjam!' };
+    } catch (err: any) {
+      return { success: false, message: err.response?.data?.message || 'Gagal meminjam buku.' };
     }
-    return res;
   };
 
-  const handleReturnRequest = (borrowId: string) => {
-    const res = mockDb.requestReturn(borrowId);
-    if (res.success) {
-      fetchData();
+  const handleReturnRequest = async (borrowId: string) => {
+    try {
+      await peminjamanService.requestReturn(borrowId);
+      await fetchData();
+      return { success: true, message: 'Permintaan pengembalian berhasil diajukan.' };
+    } catch (err: any) {
+      return { success: false, message: err.response?.data?.message || 'Gagal mengajukan pengembalian.' };
     }
-    return res;
   };
 
   const handleRSVP = (evtTitle: string) => {
     alert(`Terima kasih! Pendaftaran RSVP Anda untuk "${evtTitle}" telah berhasil.`);
   };
 
-  const handleSaveProfile = (updatedName: string, updatedEmail: string, updatedPhone: string, whatsappNotif: boolean, emailNotif: boolean) => {
+  const handleSaveProfile = async (updatedName: string, updatedEmail: string, updatedPhone: string, whatsappNotif: boolean, emailNotif: boolean) => {
     if (user) {
-      const updatedUser = { ...user, name: updatedName };
-      setUser(updatedUser);
-      localStorage.setItem('lib_session_user', JSON.stringify(updatedUser));
-      setProfileData(prev => ({
-        ...prev,
-        name: updatedName,
-        email: updatedEmail,
-        phone: updatedPhone,
-        whatsappNotif,
-        emailNotif
-      }));
-      alert('Perubahan profil berhasil disimpan!');
+      try {
+        // Find DB member ID
+        const loggedInUserStr = localStorage.getItem('lib_user');
+        if (!loggedInUserStr) return;
+        const loggedInUser = JSON.parse(loggedInUserStr);
+
+        await anggotaService.updateMember(loggedInUser.dbId || loggedInUser.id, {
+          name: updatedName,
+          email: updatedEmail,
+          phone: updatedPhone,
+        });
+
+        const updatedUser = { ...user, name: updatedName };
+        setUser(updatedUser);
+        localStorage.setItem('lib_user', JSON.stringify({
+          ...loggedInUser,
+          name: updatedName,
+          email: updatedEmail,
+          phone: updatedPhone
+        }));
+
+        setProfileData(prev => ({
+          ...prev,
+          name: updatedName,
+          email: updatedEmail,
+          phone: updatedPhone,
+          whatsappNotif,
+          emailNotif
+        }));
+        alert('Perubahan profil berhasil disimpan!');
+      } catch (err: any) {
+        alert(err.response?.data?.message || 'Gagal menyimpan perubahan profil.');
+      }
     }
   };
 
@@ -194,72 +248,71 @@ function App() {
   };
 
   // --- Admin Handler Functions ---
-  const handleRegisterMember = (e: React.FormEvent, memberData: any) => {
+  const handleRegisterMember = async (e: React.FormEvent, memberData: any) => {
     e.preventDefault();
-    if (!memberData.id || !memberData.name || !memberData.email) {
-      alert('Mohon isi semua field wajib!');
+    try {
+      await anggotaService.createMember({
+        name: memberData.name,
+        email: memberData.email,
+        phone: memberData.phone,
+        password: memberData.password || 'password',
+      });
+      alert('Anggota baru berhasil didaftarkan!');
+      await fetchData();
+      return true;
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Gagal mendaftarkan anggota baru.');
       return false;
     }
-    const res = mockDb.addMember(memberData);
-    alert(res.message);
-    if (res.success) {
-      fetchData();
-      return true;
-    }
-    return false;
   };
 
-  const handleToggleMemberStatus = (member: UserAccount) => {
-    const updated = {
-      ...member,
-      status: member.status === 'active' ? ('inactive' as const) : ('active' as const)
-    };
-    const res = mockDb.updateMember(updated);
-    if (res.success) {
-      fetchData();
-    } else {
-      alert(res.message);
+  const handleToggleMemberStatus = async (member: any) => {
+    try {
+      await anggotaService.toggleMemberStatus(member.dbId || member.id);
+      await fetchData();
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Gagal mengubah status anggota.');
     }
   };
 
-  const handleBookSubmit = (e: React.FormEvent, bookData: any, editingBook: Book | null) => {
+  const handleBookSubmit = async (e: React.FormEvent, bookData: any, editingBook: any | null) => {
     e.preventDefault();
-    if (editingBook) {
-      const res = mockDb.updateBook({
-        ...editingBook,
-        ...bookData
-      });
-      alert(res.message);
-      if (res.success) {
-        fetchData();
+    try {
+      if (editingBook) {
+        await bukuService.updateBook(editingBook.dbId, bookData);
+        alert('Buku berhasil diperbarui!');
+      } else {
+        await bukuService.createBook(bookData);
+        alert('Buku berhasil ditambahkan!');
       }
-    } else {
-      const coverSeed = bookData.title.toLowerCase().replace(/[^a-z0-9]/g, '') || 'booksstack';
-      const res = mockDb.addBook({
-        ...bookData,
-        coverSeed
-      });
-      alert(res.message);
-      if (res.success) {
-        fetchData();
-      }
+      await fetchData();
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Gagal menyimpan buku.');
     }
   };
 
-  const handleBookDelete = (bookId: string) => {
+  const handleBookDelete = async (bookId: string) => {
     if (window.confirm('Apakah Anda yakin ingin menghapus buku ini dari katalog?')) {
-      const res = mockDb.deleteBook(bookId);
-      alert(res.message);
-      if (res.success) {
-        fetchData();
+      try {
+        const match = books.find(b => b.id === bookId);
+        if (!match) return;
+        await bukuService.deleteBook(match.dbId);
+        alert('Buku berhasil dihapus!');
+        await fetchData();
+      } catch (err: any) {
+        alert(err.response?.data?.message || 'Gagal menghapus buku.');
       }
     }
   };
 
-  const handleVerifyReturn = (borrowId: string) => {
-    const res = mockDb.adminVerifyReturn(borrowId);
-    alert(res.message);
-    fetchData();
+  const handleVerifyReturn = async (borrowId: string) => {
+    try {
+      await peminjamanService.verifyReturn(borrowId);
+      alert('Pengembalian berhasil diverifikasi.');
+      await fetchData();
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Gagal memverifikasi pengembalian.');
+    }
   };
 
   const isAdminView = currentView.startsWith('admin_');
@@ -391,6 +444,19 @@ function App() {
                 allTransactions={allTransactions}
                 members={members}
               />
+            </motion.div>
+          )}
+
+          {currentView === 'admin_hr' && (
+            <motion.div
+              key="admin_hr"
+              variants={pageVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={pageTransition}
+            >
+              <AdminHR />
             </motion.div>
           )}
         </AnimatePresence>

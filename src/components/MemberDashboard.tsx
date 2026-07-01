@@ -7,7 +7,7 @@ import type { BorrowRequest, Bookmark, Reservation, SpaceBooking, Book } from '.
 interface MemberDashboardProps {
   user: { name: string; id: string } | null;
   borrows: BorrowRequest[];
-  onReturnRequest: (borrowId: string) => { success: boolean; message: string };
+  onReturnRequest: (borrowId: string) => Promise<{ success: boolean; message: string }> | any;
   onBrowseBooks: () => void;
   refreshBorrows: () => void;
 }
@@ -45,18 +45,20 @@ export const MemberDashboard: React.FC<MemberDashboardProps> = ({
   
   const bookmarkedBooks = bookmarks.map(b => allBooks.find(bk => bk.id === b.bookId)).filter(Boolean) as Book[];
 
-  const handleReturnSubmit = (borrowId: string) => {
+  const handleReturnSubmit = async (borrowId: string) => {
     setProcessingId(borrowId);
     setActionFeedback(null);
 
-    setTimeout(() => {
-      const res = onReturnRequest(borrowId);
+    try {
+      const res = await onReturnRequest(borrowId);
       setActionFeedback(res);
       setProcessingId(null);
       if (res.success) {
         refreshBorrows();
       }
-    }, 600);
+    } catch {
+      setProcessingId(null);
+    }
   };
 
   const calculateDaysRemaining = (dueDateStr: string): { days: number; isOverdue: boolean } => {

@@ -8,7 +8,7 @@ import collectionsHeroImg from '../assets/library-collections-hero.png';
 interface BookCatalogProps {
   books: Book[];
   user: { name: string; id: string } | null;
-  onBorrow: (bookId: string) => { success: boolean; message: string };
+  onBorrow: (bookId: string) => Promise<{ success: boolean; message: string }> | any;
   onLoginRequest: () => void;
   refreshBooks: () => void;
   globalSearchQuery: string;
@@ -198,7 +198,7 @@ export const BookCatalog: React.FC<BookCatalogProps> = ({
     return matchesSearch && matchesCategory && matchesAvailability;
   });
 
-  const handleBorrowClick = (book: Book) => {
+  const handleBorrowClick = async (book: Book) => {
     if (!user) {
       onLoginRequest();
       return;
@@ -207,8 +207,8 @@ export const BookCatalog: React.FC<BookCatalogProps> = ({
     setIsBorrowing(true);
     setActionFeedback(null);
 
-    setTimeout(() => {
-      const res = onBorrow(book.id);
+    try {
+      const res = await onBorrow(book.id);
       setActionFeedback(res);
       setIsBorrowing(false);
       
@@ -216,7 +216,9 @@ export const BookCatalog: React.FC<BookCatalogProps> = ({
         refreshBooks();
         setSelectedBook(prev => prev && prev.id === book.id ? { ...prev, stock: prev.stock - 1 } : prev);
       }
-    }, 600);
+    } catch {
+      setIsBorrowing(false);
+    }
   };
 
   const handleReserveClick = (book: Book) => {
