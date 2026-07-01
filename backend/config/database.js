@@ -1,6 +1,8 @@
 require('dotenv').config();
 const { Sequelize } = require('sequelize');
 
+const isLocalhost = (process.env.DB_HOST || 'localhost') === 'localhost' || (process.env.DB_HOST || 'localhost') === '127.0.0.1';
+
 const sequelize = new Sequelize(
   process.env.DB_NAME || 'atma_library_db',
   process.env.DB_USER || 'root',
@@ -15,6 +17,11 @@ const sequelize = new Sequelize(
       freezeTableName: true, // Model name matches table name exactly
     },
     timezone: '+07:00', // Matches Western Indonesian Time (WIB)
+    dialectOptions: isLocalhost ? {} : {
+      ssl: {
+        rejectUnauthorized: false,
+      }
+    }
   }
 );
 
