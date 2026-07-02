@@ -115,7 +115,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
             <Books className="w-4.5 h-4.5 text-white" weight="bold" />
           </div>
           <span className="font-sans font-extrabold text-lg tracking-[0.12em] text-[#1B1B1B]">
-            LIBRA
+            ATMA LIBRARY
           </span>
         </div>
 
