@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+require('mysql2'); // Force Vercel to bundle the mysql2 database driver
 const { sequelize } = require('../backend/models');
 
 // Import routes from backend
@@ -24,20 +25,16 @@ app.use((req, res, next) => {
   next();
 });
 
-// Database connection & sync check middleware
+// Database connection check middleware
 let isConnected = false;
 app.use(async (req, res, next) => {
   if (!isConnected) {
     try {
       await sequelize.authenticate();
       console.log('Database connected successfully in serverless context.');
-      
-      // Auto sync model structures (runs alter table if models changed)
-      await sequelize.sync({ alter: true });
-      console.log('Database synchronized successfully in serverless context.');
       isConnected = true;
     } catch (err) {
-      console.error('Database connection/sync error in serverless context:', err);
+      console.error('Database connection error in serverless context:', err);
     }
   }
   next();
