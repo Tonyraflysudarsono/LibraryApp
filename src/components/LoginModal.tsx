@@ -143,20 +143,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onLogin
               </button>
             </form>
 
-            {/* Demo credentials helper */}
-            <div className="mt-8 pt-6 border-t border-[#D3D3D3] text-left bg-[#F5F5F5] p-4 rounded-md border border-[#D3D3D3]">
-              <h4 className="text-[10px] font-bold text-[#6E6E6E] tracking-wider uppercase mb-2 font-mono">
-                Uji Coba:
-              </h4>
-              <div className="space-y-1 font-mono text-[10px] text-[#6E6E6E]">
-                <p>
-                  Anggota: <span className="text-[#0265DC] font-bold">MEM001</span> (Adrian Wijaya) - Sandi: password
-                </p>
-                <p>
-                  Admin: <span className="text-[#FA0F00] font-bold">ADM001</span> (Admin Perpustakaan) - Sandi: password
-                </p>
-              </div>
-            </div>
+
           </motion.div>
         </div>
       )}
