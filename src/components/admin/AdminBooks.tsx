@@ -18,6 +18,7 @@ import {
   ArrowLeft
 } from '@phosphor-icons/react';
 import type { Book, BorrowRequest, UserAccount } from '../../data/mockDb';
+import { getBookCover } from '../../utils/bookCovers';
 
 interface AdminBooksProps {
   books: Book[];
@@ -675,7 +676,6 @@ export const AdminBooks: React.FC<AdminBooksProps> = ({
                     {/* Book Cards Grid */}
                     <div className="grid grid-cols-3 gap-3">
                       {relatedBooksList.map(rBook => {
-                        const rExt = getExtraBookDetails(rBook);
                         return (
                           <div 
                             key={rBook.id} 
@@ -685,12 +685,8 @@ export const AdminBooks: React.FC<AdminBooksProps> = ({
                             }}
                             className="flex flex-col gap-1.5 cursor-pointer group text-center"
                           >
-                            <div className={`aspect-[3/4] w-full rounded-xl bg-gradient-to-br ${rExt.gradient} border border-slate-200/50 flex flex-col justify-between p-2 shadow-sm relative overflow-hidden group-hover:scale-[1.03] transition-all`}>
-                              <div className="absolute inset-0 bg-black/[0.03] pointer-events-none" />
-                              <span className="text-sm leading-none">{rExt.illustration}</span>
-                              <span className="text-[6px] font-display font-extrabold text-white text-left leading-tight truncate">
-                                {rBook.title}
-                              </span>
+                            <div className="aspect-[3/4] w-full rounded-xl border border-slate-200/50 shadow-sm relative overflow-hidden group-hover:scale-[1.03] transition-all">
+                              <img src={getBookCover(rBook.coverSeed)} alt={rBook.title} className="absolute inset-0 w-full h-full object-cover" />
                             </div>
                             <span className="text-[9px] font-bold text-[#1B1B1B] truncate group-hover:text-[#FA5A3C] transition-colors leading-tight px-0.5">
                               {rBook.title}
@@ -855,11 +851,10 @@ export const AdminBooks: React.FC<AdminBooksProps> = ({
                               className="flex flex-col gap-2.5 cursor-pointer group"
                             >
                               {/* Premium Cover Mockup */}
-                              <div className="aspect-[3/4] w-full rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100 bg-gradient-to-br from-indigo-400 to-indigo-500 border border-[#EAEAEA] flex flex-col justify-between p-3.5 shadow-[0_4px_12px_rgba(0,0,0,0.05)] relative overflow-hidden transition-all duration-300 group-hover:border-[#FA5A3C] group-hover:scale-[1.02]">
-                                {/* Cover art styles */}
-                                <div className={`absolute inset-0 bg-gradient-to-br ${ext.gradient} pointer-events-none`} />
-                                <div className="absolute inset-0 bg-black/[0.04] pointer-events-none" />
-                                <div className="absolute left-0 top-0 bottom-0 w-2.5 bg-gradient-to-r from-black/[0.12] to-transparent pointer-events-none" />
+                              <div className="aspect-[3/4] w-full rounded-2xl border border-[#EAEAEA] flex flex-col justify-between p-3.5 shadow-[0_4px_12px_rgba(0,0,0,0.05)] relative overflow-hidden transition-all duration-300 group-hover:border-[#FA5A3C] group-hover:scale-[1.02]">
+                                <img src={getBookCover(book.coverSeed)} alt={book.title} className="absolute inset-0 w-full h-full object-cover z-0" />
+                                <div className="absolute inset-0 bg-black/35 z-5 pointer-events-none" />
+                                <div className="absolute left-0 top-0 bottom-0 w-2.5 bg-gradient-to-r from-black/[0.18] to-transparent z-10 pointer-events-none" />
                                 
                                 <span className="text-xl leading-none z-10">{ext.illustration}</span>
                                 
@@ -867,7 +862,7 @@ export const AdminBooks: React.FC<AdminBooksProps> = ({
                                   <h5 className="font-display font-extrabold text-[10px] sm:text-[11px] leading-tight drop-shadow-sm tracking-wide line-clamp-2">
                                     {book.title}
                                   </h5>
-                                  <span className="text-[7px] sm:text-[8px] font-bold opacity-80 uppercase font-mono tracking-wider truncate">
+                                  <span className="text-[7px] sm:text-[8px] font-bold opacity-90 uppercase font-mono tracking-wider truncate">
                                     {book.author}
                                   </span>
                                 </div>
@@ -905,7 +900,6 @@ export const AdminBooks: React.FC<AdminBooksProps> = ({
                             </tr>
                           ) : (
                             paginatedBooks.map(book => {
-                              const ext = getExtraBookDetails(book);
                               return (
                                 <tr 
                                   key={book.id} 
@@ -917,9 +911,8 @@ export const AdminBooks: React.FC<AdminBooksProps> = ({
                                 >
                                   <td className="py-3.5 pr-4 font-mono font-bold text-[#808080]">{book.id}</td>
                                   <td className="py-3.5 px-4">
-                                    <div className={`w-8 h-11 rounded bg-gradient-to-br ${ext.gradient} border border-slate-200/50 flex items-center justify-center p-0.5 shadow-sm shrink-0 overflow-hidden text-[6px] font-display font-extrabold text-slate-800 text-center leading-tight relative`}>
-                                      <div className="absolute inset-0 bg-[#3D1E1E]/5" />
-                                      {book.title.slice(0, 10)}
+                                    <div className="w-8 h-11 rounded border border-slate-200/50 shadow-sm shrink-0 overflow-hidden relative">
+                                      <img src={getBookCover(book.coverSeed)} alt={book.title} className="w-full h-full object-cover" />
                                     </div>
                                   </td>
                                   <td className="py-3.5 px-4">
@@ -1088,7 +1081,6 @@ export const AdminBooks: React.FC<AdminBooksProps> = ({
 
                   <div className="flex flex-col gap-3">
                     {books.slice(0, 3).map(book => {
-                      const ext = getExtraBookDetails(book);
                       return (
                         <div 
                           key={book.id} 
@@ -1098,9 +1090,8 @@ export const AdminBooks: React.FC<AdminBooksProps> = ({
                           }}
                           className="flex gap-3 items-center cursor-pointer group"
                         >
-                          <div className={`w-8 h-11 rounded bg-gradient-to-br ${ext.gradient} border border-slate-200/50 flex items-center justify-center p-0.5 shadow-sm shrink-0 overflow-hidden text-[6px] font-display font-extrabold text-slate-800 text-center leading-tight relative`}>
-                            <div className="absolute inset-0 bg-[#3D1E1E]/5" />
-                            {book.title.slice(0, 10)}
+                          <div className="w-8 h-11 rounded border border-slate-200/50 shadow-sm shrink-0 overflow-hidden relative">
+                            <img src={getBookCover(book.coverSeed)} alt={book.title} className="w-full h-full object-cover" />
                           </div>
                           <div className="flex flex-col text-left flex-1 min-w-0">
                             <h4 className="font-extrabold text-xs text-[#1B1B1B] truncate leading-tight group-hover:text-[#FA5A3C] transition-colors">{book.title}</h4>
