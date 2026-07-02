@@ -1,18 +1,18 @@
 const COVER_MAP: { [key: string]: string } = {
-  'normandesign': 'https://covers.openlibrary.org/b/isbn/9780465050659-L.jpg',
-  'refactoring': 'https://covers.openlibrary.org/b/isbn/9780134757599-L.jpg',
-  'cleancode': 'https://covers.openlibrary.org/b/isbn/9780132350884-L.jpg',
-  'sapiens': 'https://covers.openlibrary.org/b/isbn/9780062316097-L.jpg',
-  'zerotoone': 'https://covers.openlibrary.org/b/isbn/9780804139298-L.jpg',
-  'atomichabits': 'https://covers.openlibrary.org/b/isbn/9780735211292-L.jpg',
-  'thinkingfast': 'https://covers.openlibrary.org/b/isbn/9780374275631-L.jpg',
-  'leanstartup': 'https://covers.openlibrary.org/b/isbn/9780307887894-L.jpg',
-  'startwithwhy': 'https://covers.openlibrary.org/b/isbn/9781591846444-L.jpg',
-  'hobbit': 'https://covers.openlibrary.org/b/isbn/9780547928227-L.jpg',
-  'harrypotter': 'https://covers.openlibrary.org/b/isbn/9780590353427-L.jpg',
-  'percyjackson': 'https://covers.openlibrary.org/b/isbn/9780786838653-L.jpg',
-  'educated': 'https://covers.openlibrary.org/b/isbn/9780399590504-L.jpg',
-  'stevejobs': 'https://covers.openlibrary.org/b/isbn/9781451648539-L.jpg'
+  'normandesign': 'https://books.google.com/books/content?id=vl6yDwAAQBAJ&printsec=frontcover&img=1&zoom=1',
+  'refactoring': 'https://books.google.com/books/content?id=1D5SDwAAQBAJ&printsec=frontcover&img=1&zoom=1',
+  'cleancode': 'https://books.google.com/books/content?id=hjEFCAAAQBAJ&printsec=frontcover&img=1&zoom=1',
+  'sapiens': 'https://books.google.com/books/content?id=FmyBAwAAQBAJ&printsec=frontcover&img=1&zoom=1',
+  'zerotoone': 'https://books.google.com/books/content?id=y414AwAAQBAJ&printsec=frontcover&img=1&zoom=1',
+  'atomichabits': 'https://books.google.com/books/content?id=fayeDwAAQBAJ&printsec=frontcover&img=1&zoom=1',
+  'thinkingfast': 'https://books.google.com/books/content?id=Zu5dNS4ALaAC&printsec=frontcover&img=1&zoom=1',
+  'leanstartup': 'https://books.google.com/books/content?id=hV9QHR534tQC&printsec=frontcover&img=1&zoom=1',
+  'startwithwhy': 'https://books.google.com/books/content?id=7w2gAwAAQBAJ&printsec=frontcover&img=1&zoom=1',
+  'hobbit': 'https://books.google.com/books/content?id=p7q2AAAAQBAJ&printsec=frontcover&img=1&zoom=1',
+  'harrypotter': 'https://books.google.com/books/content?id=wrOQLV6xB-wC&printsec=frontcover&img=1&zoom=1',
+  'percyjackson': 'https://books.google.com/books/content?id=3d9yDwAAQBAJ&printsec=frontcover&img=1&zoom=1',
+  'educated': 'https://books.google.com/books/content?id=3c81DwAAQBAJ&printsec=frontcover&img=1&zoom=1',
+  'stevejobs': 'https://books.google.com/books/content?id=8U2GDwAAQBAJ&printsec=frontcover&img=1&zoom=1'
 };
 
 /**
