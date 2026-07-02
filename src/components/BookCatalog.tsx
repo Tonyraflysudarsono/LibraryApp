@@ -242,15 +242,6 @@ export const BookCatalog: React.FC<BookCatalogProps> = ({
         <section className="w-full bg-[#FAF6F0] py-16 relative z-10">
           <div className="max-w-7xl mx-auto px-6 relative">
             
-            {/* Floating Donate button top right */}
-            <div className="absolute top-0 right-6 z-20 hidden lg:block">
-              <div 
-                onClick={() => alert('Terima kasih atas dukungan Anda! Fitur donasi akan segera hadir.')}
-                className="w-24 h-24 rounded-full border border-[#FA0F00] bg-white hover:bg-[#FA0F00] text-[#FA0F00] hover:text-white flex flex-col items-center justify-center text-[10px] uppercase font-bold tracking-widest shadow-lg cursor-pointer transition-all duration-300 btn-pressable"
-              >
-                <span>Donate</span>
-              </div>
-            </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch pt-8">
               {/* Left Side: Illustration Image */}
@@ -397,15 +388,6 @@ export const BookCatalog: React.FC<BookCatalogProps> = ({
         {/* Wix-inspired Contact Section */}
         <section className="w-full bg-[#FAF9F9] py-24 relative z-20">
           <div className="max-w-6xl mx-auto px-6 relative">
-            {/* Floating Donate button right side */}
-            <div className="absolute top-0 right-6 z-20 hidden md:block">
-              <div 
-                onClick={() => alert('Terima kasih atas dukungan Anda! Fitur donasi akan segera hadir.')}
-                className="w-24 h-24 rounded-full border border-[#FA0F00] bg-white hover:bg-[#FA0F00] text-[#FA0F00] hover:text-white flex flex-col items-center justify-center text-[10px] uppercase font-bold tracking-widest shadow-lg cursor-pointer transition-all duration-300 btn-pressable"
-              >
-                <span>Donate</span>
-              </div>
-            </div>
 
             <div className="text-center md:text-left mb-16 max-w-2xl">
               <h2 className="font-display font-bold text-4xl text-[#1B1B1B] tracking-tight mb-4">

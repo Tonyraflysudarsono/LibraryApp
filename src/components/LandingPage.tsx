@@ -39,12 +39,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       {/* Wix-inspired Split Hero Section */}
       <section className="w-full bg-[#FAF6F0] py-16 relative z-10 font-sans text-left">
         <div className="max-w-7xl mx-auto px-6 relative">
-          {/* Floating Donate button top right */}
-          <div className="absolute top-0 right-6 z-20 hidden lg:block">
-            <div className="w-24 h-24 rounded-full border border-[#FA0F00] bg-white hover:bg-[#FA0F00] text-[#FA0F00] hover:text-white flex flex-col items-center justify-center text-[10px] uppercase font-bold tracking-widest shadow-lg cursor-pointer transition-all duration-300 btn-pressable">
-              <span>Donate</span>
-            </div>
-          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch pt-8">
             {/* Left Side: Large Library Image */}
@@ -171,12 +165,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       {/* Wix-inspired New Additions Section */}
       <section className="w-full bg-white py-24 relative z-20">
         <div className="max-w-5xl mx-auto px-6 text-center relative">
-          {/* Floating Donate button right side */}
-          <div className="absolute top-0 right-0 z-20 hidden lg:block">
-            <div className="w-24 h-24 rounded-full border border-[#FA0F00] bg-white hover:bg-[#FA0F00] text-[#FA0F00] hover:text-white flex flex-col items-center justify-center text-[10px] uppercase font-bold tracking-widest shadow-lg cursor-pointer transition-all duration-300 btn-pressable">
-              <span>Donate</span>
-            </div>
-          </div>
 
           <span className="text-[10px] font-mono tracking-widest text-[#0265DC] uppercase block mb-2 font-bold">
             REKOMENDASI BUKU
@@ -289,12 +277,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </button>
         </div>
 
-        {/* Floating circular Donate button top right */}
-        <div className="absolute top-8 right-8 md:top-12 md:right-12 z-20">
-          <div className="w-24 h-24 rounded-full border border-[#FA0F00] bg-white hover:bg-[#FA0F00] text-[#FA0F00] hover:text-white flex flex-col items-center justify-center text-[10px] uppercase font-bold tracking-widest shadow-lg cursor-pointer transition-all duration-300 btn-pressable">
-            <span>Donate</span>
-          </div>
-        </div>
       </section>
 
       <div className="max-w-5xl mx-auto border-t border-[#D3D3D3]" />
