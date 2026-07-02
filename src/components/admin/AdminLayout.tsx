@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   House, 
-  Envelope, 
   Receipt, 
   Books, 
   Users, 
@@ -70,12 +69,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
       label: 'Dashboard', 
       icon: House 
     },
-    { 
-      id: 'inbox' as const, 
-      label: 'Inbox', 
-      icon: Envelope,
-      placeholder: true
-    },
+
     { 
       id: 'admin_transactions' as const, 
       label: 'Library Activity', 
@@ -133,7 +127,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
             return (
               <button
                 key={item.label}
-                onClick={() => handleNavClick(item.id, item.placeholder)}
+                onClick={() => handleNavClick(item.id)}
                 className={`flex items-center justify-between w-full rounded-xl py-3 px-4 text-xs font-semibold tracking-wide transition-all duration-150 group ${
                   isActive 
                     ? 'bg-[#FA5A3C] text-white shadow-sm' 
@@ -144,9 +138,6 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
                   <Icon className={`w-4.5 h-4.5 ${isActive ? 'text-white' : 'text-[#6E6E6E] group-hover:text-[#1B1B1B]'}`} />
                   <span>{item.label}</span>
                 </div>
-                {item.placeholder && (
-                  <span className="text-[9px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded uppercase">Soon</span>
-                )}
               </button>
             );
           })}
@@ -250,19 +241,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
 
       {/* Footer / Promo Card & Logout */}
       <div className="flex flex-col gap-6">
-        {/* On-the-Go Management Promo Card */}
-        <div className="bg-[#FAF9F6] border border-[#EAE9E4] rounded-2xl p-4 flex flex-col gap-3 relative overflow-hidden">
-          <div className="absolute right-0 top-0 w-16 h-16 bg-[#FA5A3C]/5 rounded-full blur-xl pointer-events-none" />
-          <div className="flex flex-col gap-1.5 text-left">
-            <h4 className="text-xs font-bold text-[#1B1B1B] leading-snug">On-the-Go Management</h4>
-            <p className="text-[10px] text-[#808080] leading-relaxed font-medium">
-              Libra Mobile lets you access books, members, and stats anytime, anywhere.
-            </p>
-          </div>
-          <button className="w-full bg-[#FA5A3C] hover:bg-[#E24A2D] text-white text-[10px] font-bold py-2 rounded-lg transition-colors btn-pressable shadow-sm">
-            Try for Free
-          </button>
-        </div>
+
 
         {/* Logout Button */}
         <button
