@@ -28,7 +28,7 @@ export const AboutPage: React.FC = () => {
                 Our Library
               </h2>
               <p className="text-sm text-[#4A4A4A] leading-relaxed font-medium mb-6">
-                AtmaLibrary adalah pusat pembelajaran kolaboratif yang didirikan dengan visi untuk memberdayakan komunitas Sleman dan Yogyakarta melalui penyediaan akses literasi tanpa batas. Kami mengintegrasikan teknologi sirkulasi digital mandiri dengan kenyamanan ruang baca fisik yang inklusif.
+                AtmaLibrary adalah pusat pembelajaran kolaboratif yang didirikan dengan visi untuk memberdayakan komunitas Surabaya melalui penyediaan akses literasi tanpa batas. Kami mengintegrasikan teknologi sirkulasi digital mandiri dengan kenyamanan ruang baca fisik yang inklusif.
               </p>
               <p className="text-sm text-[#4A4A4A] leading-relaxed font-medium">
                 Setiap sudut perpustakaan dirancang untuk memfasilitasi diskusi, penelitian mendalam, dan kreasi bersama. Kami menyelenggarakan berbagai program virtual dan fisik mingguan untuk menghubungkan pembaca, penulis, serta profesional lintas bidang.
@@ -63,16 +63,8 @@ export const AboutPage: React.FC = () => {
                 </h3>
                 <div className="space-y-6">
                   <div>
-                    <h4 className="font-display font-bold text-base text-[#1B1B1B]">Casey Lennon</h4>
+                    <h4 className="font-display font-bold text-base text-[#1B1B1B]">Tony Rafly Sudarsono</h4>
                     <p className="text-xs text-[#6E6E6E] font-mono mt-0.5">Library Director</p>
-                  </div>
-                  <div>
-                    <h4 className="font-display font-bold text-base text-[#1B1B1B]">Daniel Wright</h4>
-                    <p className="text-xs text-[#6E6E6E] font-mono mt-0.5">Library Assistant</p>
-                  </div>
-                  <div>
-                    <h4 className="font-display font-bold text-base text-[#1B1B1B]">Nora Gracia</h4>
-                    <p className="text-xs text-[#6E6E6E] font-mono mt-0.5">Library Assistant</p>
                   </div>
                 </div>
               </div>
@@ -84,16 +76,8 @@ export const AboutPage: React.FC = () => {
                 </h3>
                 <div className="space-y-6">
                   <div>
-                    <h4 className="font-display font-bold text-base text-[#1B1B1B]">Madison Thomas</h4>
+                    <h4 className="font-display font-bold text-base text-[#1B1B1B]">Adrian Faishal Hilmy</h4>
                     <p className="text-xs text-[#6E6E6E] font-mono mt-0.5">Chair</p>
-                  </div>
-                  <div>
-                    <h4 className="font-display font-bold text-base text-[#1B1B1B]">Gabriel Clark</h4>
-                    <p className="text-xs text-[#6E6E6E] font-mono mt-0.5">Vice Chair</p>
-                  </div>
-                  <div>
-                    <h4 className="font-display font-bold text-base text-[#1B1B1B]">Taylor Young</h4>
-                    <p className="text-xs text-[#6E6E6E] font-mono mt-0.5">Council Representative</p>
                   </div>
                 </div>
               </div>

@@ -406,12 +406,11 @@ export const BookCatalog: React.FC<BookCatalogProps> = ({
                   Address
                 </h3>
                 <p className="text-sm text-[#6E6E6E] leading-relaxed font-medium mb-6">
-                  Jl. Babarsari No.44, <br />
-                  Janti, Caturtunggal, Depok, <br />
-                  Sleman, Yogyakarta 55281
+                  Jl Dharmawangsa Dalam, <br />
+                  Surabaya 60286
                 </p>
                 <p className="text-sm text-[#6E6E6E] leading-relaxed font-medium">
-                  Telp: 123-456-7890 <br />
+                  Telp: 0812-1742-4813 <br />
                   Email: info@atmalibrary.org
                 </p>
               </div>
@@ -495,7 +494,7 @@ export const BookCatalog: React.FC<BookCatalogProps> = ({
         <section className="w-full relative z-20 h-[450px] overflow-hidden">
           {/* OpenStreetMap iframe */}
           <iframe 
-            src="https://www.openstreetmap.org/export/embed.html?bbox=110.4130%2C-7.7835%2C110.4190%2C-7.7785&amp;layer=mapnik"
+            src="https://www.openstreetmap.org/export/embed.html?bbox=112.7555%2C-7.2750%2C112.7615%2C-7.2700&amp;layer=mapnik"
             title="AtmaLibrary Location Map"
             className="w-full h-full border-none grayscale contrast-115 hover:grayscale-0 transition-all duration-700 ease-in-out"
           />
@@ -513,7 +512,7 @@ export const BookCatalog: React.FC<BookCatalogProps> = ({
               ATMA LIBRARY
             </h4>
             <p className="text-[10px] font-mono font-bold text-[#6E6E6E]">
-              Yogyakarta, Indonesia
+              Surabaya, Indonesia
             </p>
             {/* Marker indicator triangle pointing down */}
             <div className="absolute bottom-[-6px] left-[20px] w-3 h-3 bg-white border-r border-b border-[#D3D3D3] rotate-45" />

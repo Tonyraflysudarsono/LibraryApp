@@ -28,12 +28,11 @@ export const ContactSection: React.FC = () => {
               Address
             </h3>
             <p className="text-sm text-[#6E6E6E] leading-relaxed font-medium mb-6">
-              Jl. Babarsari No.44, <br />
-              Janti, Caturtunggal, Depok, <br />
-              Sleman, Yogyakarta 55281
+              Jl Dharmawangsa Dalam, <br />
+              Surabaya 60286
             </p>
             <p className="text-sm text-[#6E6E6E] leading-relaxed font-medium">
-              Telp: 123-456-7890 <br />
+              Telp: 0812-1742-4813 <br />
               Email: info@atmalibrary.org
             </p>
           </div>
