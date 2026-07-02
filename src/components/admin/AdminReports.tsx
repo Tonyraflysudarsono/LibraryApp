@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { BookOpen, TrendUp, Users, Coin, Funnel } from '@phosphor-icons/react';
+import React, { useState, useEffect } from 'react';
+import { BookOpen, TrendUp, Users, Coin, Funnel, Gear, Info, ShieldWarning, ArrowCounterClockwise } from '@phosphor-icons/react';
 import type { Book, UserAccount, BorrowRequest } from '../../data/mockDb';
 
 interface AdminReportsProps {
@@ -13,8 +13,65 @@ export const AdminReports: React.FC<AdminReportsProps> = ({
   members,
   allTransactions
 }) => {
+  const [activeTab, setActiveTab] = useState<'reports' | 'settings'>('reports');
+  
+  // Reports states
   const [reportStartDate, setReportStartDate] = useState('');
   const [reportEndDate, setReportEndDate] = useState('');
+
+  // Settings states
+  const [finePerDay, setFinePerDay] = useState(5000);
+  const [maxBorrowDays, setMaxBorrowDays] = useState(14);
+  const [libraryName, setLibraryName] = useState('ATMA LIBRARY');
+  const [libraryAddress, setLibraryAddress] = useState('Jl Dharmawangsa Dalam, Surabaya 60286');
+  const [libraryPhone, setLibraryPhone] = useState('0812-1742-4813');
+  const [libraryEmail, setLibraryEmail] = useState('info@atmalibrary.org');
+
+  // Load settings on mount
+  useEffect(() => {
+    const savedFine = localStorage.getItem('lib_fine_per_day');
+    const savedMaxDays = localStorage.getItem('lib_max_borrow_days');
+    const savedName = localStorage.getItem('lib_library_name');
+    const savedAddress = localStorage.getItem('lib_library_address');
+    const savedPhone = localStorage.getItem('lib_library_phone');
+    const savedEmail = localStorage.getItem('lib_library_email');
+
+    if (savedFine) setFinePerDay(Number(savedFine));
+    if (savedMaxDays) setMaxBorrowDays(Number(savedMaxDays));
+    if (savedName) setLibraryName(savedName);
+    if (savedAddress) setLibraryAddress(savedAddress);
+    if (savedPhone) setLibraryPhone(savedPhone);
+    if (savedEmail) setLibraryEmail(savedEmail);
+  }, []);
+
+  const handleSaveSettings = (e: React.FormEvent) => {
+    e.preventDefault();
+    localStorage.setItem('lib_fine_per_day', finePerDay.toString());
+    localStorage.setItem('lib_max_borrow_days', maxBorrowDays.toString());
+    localStorage.setItem('lib_library_name', libraryName);
+    localStorage.setItem('lib_library_address', libraryAddress);
+    localStorage.setItem('lib_library_phone', libraryPhone);
+    localStorage.setItem('lib_library_email', libraryEmail);
+    
+    alert('Pengaturan berhasil disimpan! Halaman akan dimuat ulang untuk menerapkan perubahan.');
+    window.location.reload();
+  };
+
+  const handleResetDatabase = () => {
+    const confirmed = window.confirm(
+      'PERINGATAN: Apakah Anda yakin ingin menyetel ulang database perpustakaan? Semua transaksi peminjaman akan dihapus dan setelan stok buku akan dikembalikan ke kondisi awal.'
+    );
+    if (confirmed) {
+      localStorage.removeItem('lib_borrows');
+      localStorage.removeItem('lib_bookmarks');
+      localStorage.removeItem('lib_reservations');
+      localStorage.removeItem('lib_space_bookings');
+      localStorage.removeItem('lib_books');
+      
+      alert('Database berhasil disetel ulang! Aplikasi akan dimuat ulang.');
+      window.location.reload();
+    }
+  };
 
   const filtered = allTransactions.filter(tx => {
     if (!reportStartDate && !reportEndDate) return true;
@@ -28,187 +85,375 @@ export const AdminReports: React.FC<AdminReportsProps> = ({
 
   return (
     <div className="relative z-10 bg-[#F5F5F5] min-h-screen pb-20 font-sans text-left">
-      <section className="w-full bg-[#FAF6F0] py-16 text-center border-b border-[#D3D3D3]">
+      {/* Banner Header */}
+      <section className="w-full bg-[#FAF6F0] py-12 text-center border-b border-[#D3D3D3]">
         <div className="max-w-4xl mx-auto px-6">
           <span className="rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.2em] font-medium bg-[#FA0F00]/10 text-[#FA0F00] mb-3 inline-block">
             Panel Administrator
           </span>
-          <h1 className="font-display font-medium text-4xl md:text-5xl text-[#3D1E1E] mb-4">
-            Laporan & Analisis Statistik
+          <h1 className="font-display font-medium text-3xl md:text-4xl text-[#3D1E1E] mb-3">
+            Settings & Reports
           </h1>
-          <div className="w-12 h-[2px] bg-[#3D1E1E] mx-auto mb-4" />
-          <p className="text-xs md:text-sm text-[#6E6E6E] max-w-xl mx-auto font-medium leading-relaxed font-sans">
-            Analisis sirkulasi perpustakaan, denda terkumpul, dan filter transaksi peminjaman berdasarkan periode tanggal.
+          <div className="w-12 h-[2px] bg-[#3D1E1E] mx-auto mb-3" />
+          <p className="text-xs text-[#6E6E6E] max-w-xl mx-auto font-medium leading-relaxed font-sans">
+            Konfigurasi sistem perpustakaan, profil kontak, rekapitulasi sirkulasi, dan analisis log transaksi perpustakaan.
           </p>
         </div>
       </section>
 
-      <div className="max-w-6xl mx-auto px-6 mt-10">
-        {/* Stats Summary Bento Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {/* Card 1: Judul Buku */}
-          <div className="border border-[#3D1E1E]/10 bg-[#3D1E1E]/5 p-1.5 rounded-2xl">
-            <div className="bg-white border border-[#3D1E1E]/15 p-6 rounded-[calc(1rem-2px)] flex items-center justify-between">
-              <div>
-                <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#6E6E6E] mb-1">Judul Buku</p>
-                <h3 className="font-display font-bold text-3xl text-[#1B1B1B]">{books.length}</h3>
-              </div>
-              <div className="w-10 h-10 rounded-full bg-[#FAF6F0] border border-[#3D1E1E]/10 flex items-center justify-center text-[#FA0F00]">
-                <BookOpen className="w-5 h-5" weight="bold" />
-              </div>
-            </div>
-          </div>
-
-          {/* Card 2: Salinan Buku */}
-          <div className="border border-[#3D1E1E]/10 bg-[#3D1E1E]/5 p-1.5 rounded-2xl">
-            <div className="bg-white border border-[#3D1E1E]/15 p-6 rounded-[calc(1rem-2px)] flex items-center justify-between">
-              <div>
-                <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#6E6E6E] mb-1">Total Salinan</p>
-                <h3 className="font-display font-bold text-3xl text-[#1B1B1B]">
-                  {books.reduce((acc, b) => acc + b.stock, 0)}
-                  <span className="text-sm text-[#9E9E9E] font-sans font-medium"> / {books.reduce((acc, b) => acc + b.maxStock, 0)}</span>
-                </h3>
-              </div>
-              <div className="w-10 h-10 rounded-full bg-[#FAF6F0] border border-[#3D1E1E]/10 flex items-center justify-center text-[#FA0F00]">
-                <TrendUp className="w-5 h-5" weight="bold" />
-              </div>
-            </div>
-          </div>
-
-          {/* Card 3: Anggota */}
-          <div className="border border-[#3D1E1E]/10 bg-[#3D1E1E]/5 p-1.5 rounded-2xl">
-            <div className="bg-white border border-[#3D1E1E]/15 p-6 rounded-[calc(1rem-2px)] flex items-center justify-between">
-              <div>
-                <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#6E6E6E] mb-1">Anggota Aktif</p>
-                <h3 className="font-display font-bold text-3xl text-[#1B1B1B]">{members.filter(m => m.status === 'active').length}</h3>
-              </div>
-              <div className="w-10 h-10 rounded-full bg-[#FAF6F0] border border-[#3D1E1E]/10 flex items-center justify-center text-[#FA0F00]">
-                <Users className="w-5 h-5" weight="bold" />
-              </div>
-            </div>
-          </div>
-
-          {/* Card 4: Total Denda */}
-          <div className="border border-[#3D1E1E]/10 bg-[#3D1E1E]/5 p-1.5 rounded-2xl">
-            <div className="bg-white border border-[#3D1E1E]/15 p-6 rounded-[calc(1rem-2px)] flex items-center justify-between">
-              <div>
-                <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#6E6E6E] mb-1">Total Denda</p>
-                <h3 className="font-display font-bold text-2xl text-green-600">
-                  Rp {allTransactions.reduce((acc, tx) => acc + (tx.fine || 0), 0).toLocaleString('id-ID')}
-                </h3>
-              </div>
-              <div className="w-10 h-10 rounded-full bg-[#FAF6F0] border border-[#3D1E1E]/10 flex items-center justify-center text-green-600">
-                <Coin className="w-5 h-5" weight="bold" />
-              </div>
-            </div>
-          </div>
+      <div className="max-w-6xl mx-auto px-6 mt-8">
+        
+        {/* Modern Tabs Bar */}
+        <div className="flex border-b border-[#D3D3D3] mb-8 gap-6">
+          <button 
+            onClick={() => setActiveTab('reports')}
+            className={`pb-3 text-xs font-bold border-b-2 tracking-wider uppercase transition-all duration-130 flex items-center gap-2 ${
+              activeTab === 'reports' 
+                ? 'border-[#FA0F00] text-[#FA0F00]' 
+                : 'border-transparent text-[#6E6E6E] hover:text-[#1B1B1B]'
+            }`}
+          >
+            <Funnel className="w-4 h-4" />
+            Laporan Sirkulasi
+          </button>
+          <button 
+            onClick={() => setActiveTab('settings')}
+            className={`pb-3 text-xs font-bold border-b-2 tracking-wider uppercase transition-all duration-130 flex items-center gap-2 ${
+              activeTab === 'settings' 
+                ? 'border-[#FA0F00] text-[#FA0F00]' 
+                : 'border-transparent text-[#6E6E6E] hover:text-[#1B1B1B]'
+            }`}
+          >
+            <Gear className="w-4 h-4" />
+            Pengaturan Sistem
+          </button>
         </div>
 
-        {/* Filter Date Range Form */}
-        <div className="bg-white border border-[#D3D3D3] rounded-lg p-6 mb-8 text-left text-xs">
-          <div className="flex items-center gap-2 mb-4 pb-2 border-b border-[#F0F0F0]">
-            <Funnel className="w-4 h-4 text-[#FA0F00]" />
-            <h4 className="font-bold text-sm text-[#1B1B1B] uppercase tracking-wider">Filter Periode Laporan</h4>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 items-end">
-            <div className="space-y-1">
-              <label className="font-bold text-[#6E6E6E] tracking-wider uppercase block">Tanggal Mulai</label>
-              <input
-                type="date"
-                value={reportStartDate}
-                onChange={(e) => setReportStartDate(e.target.value)}
-                className="w-full bg-[#F5F5F5] border border-[#D3D3D3] rounded-md px-3 py-2 text-xs text-[#1B1B1B] focus:outline-none focus:border-[#FA0F00] focus:bg-white transition-all"
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="font-bold text-[#6E6E6E] tracking-wider uppercase block">Tanggal Akhir</label>
-              <input
-                type="date"
-                value={reportEndDate}
-                onChange={(e) => setReportEndDate(e.target.value)}
-                className="w-full bg-[#F5F5F5] border border-[#D3D3D3] rounded-md px-3 py-2 text-xs text-[#1B1B1B] focus:outline-none focus:border-[#FA0F00] focus:bg-white transition-all"
-              />
-            </div>
-            <div>
-              <button
-                onClick={() => {
-                  setReportStartDate('');
-                  setReportEndDate('');
-                }}
-                className="w-full bg-[#FAF6F0] hover:bg-[#EAE3D2] border border-[#3D1E1E]/15 text-[#3D1E1E] font-semibold py-2 rounded-md shadow-sm transition-all text-xs font-mono uppercase tracking-wider"
-              >
-                Reset Filter
-              </button>
-            </div>
-          </div>
-        </div>
+        {activeTab === 'reports' ? (
+          <div className="animate-in fade-in duration-200">
+            {/* Stats Summary Bento Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              {/* Card 1: Judul Buku */}
+              <div className="border border-[#3D1E1E]/10 bg-[#3D1E1E]/5 p-1.5 rounded-2xl">
+                <div className="bg-white border border-[#3D1E1E]/15 p-6 rounded-[calc(1rem-2px)] flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#6E6E6E] mb-1">Judul Buku</p>
+                    <h3 className="font-display font-bold text-3xl text-[#1B1B1B]">{books.length}</h3>
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-[#FAF6F0] border border-[#3D1E1E]/10 flex items-center justify-center text-[#FA0F00]">
+                    <BookOpen className="w-5 h-5" weight="bold" />
+                  </div>
+                </div>
+              </div>
 
-        {/* Filtered List Double-Bezel Card Container */}
-        <div className="border border-[#3D1E1E]/10 bg-[#3D1E1E]/5 p-2 rounded-2xl">
-          <div className="bg-white border border-[#3D1E1E]/15 rounded-[calc(1rem-2px)] overflow-hidden">
-            <div className="px-6 py-4 bg-[#FAF6F0] border-b border-[#D3D3D3] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-              <h3 className="font-display font-bold text-base text-[#3D1E1E]">Log Sirkulasi Terfilter</h3>
-              
-              {/* Filter stats summary */}
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#6E6E6E] bg-[#3D1E1E]/5 px-2.5 py-1 rounded">
-                Peminjaman: {filtered.length} | Denda: Rp {totalFineInPeriod.toLocaleString('id-ID')}
-              </span>
+              {/* Card 2: Salinan Buku */}
+              <div className="border border-[#3D1E1E]/10 bg-[#3D1E1E]/5 p-1.5 rounded-2xl">
+                <div className="bg-white border border-[#3D1E1E]/15 p-6 rounded-[calc(1rem-2px)] flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#6E6E6E] mb-1">Total Salinan</p>
+                    <h3 className="font-display font-bold text-3xl text-[#1B1B1B]">
+                      {books.reduce((acc, b) => acc + b.stock, 0)}
+                      <span className="text-sm text-[#9E9E9E] font-sans font-medium"> / {books.reduce((acc, b) => acc + b.maxStock, 0)}</span>
+                    </h3>
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-[#FAF6F0] border border-[#3D1E1E]/10 flex items-center justify-center text-[#FA0F00]">
+                    <TrendUp className="w-5 h-5" weight="bold" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 3: Anggota */}
+              <div className="border border-[#3D1E1E]/10 bg-[#3D1E1E]/5 p-1.5 rounded-2xl">
+                <div className="bg-white border border-[#3D1E1E]/15 p-6 rounded-[calc(1rem-2px)] flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#6E6E6E] mb-1">Anggota Aktif</p>
+                    <h3 className="font-display font-bold text-3xl text-[#1B1B1B]">{members.filter(m => m.status === 'active').length}</h3>
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-[#FAF6F0] border border-[#3D1E1E]/10 flex items-center justify-center text-[#FA0F00]">
+                    <Users className="w-5 h-5" weight="bold" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 4: Total Denda */}
+              <div className="border border-[#3D1E1E]/10 bg-[#3D1E1E]/5 p-1.5 rounded-2xl">
+                <div className="bg-white border border-[#3D1E1E]/15 p-6 rounded-[calc(1rem-2px)] flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#6E6E6E] mb-1">Total Denda</p>
+                    <h3 className="font-display font-bold text-2xl text-green-600">
+                      Rp {allTransactions.reduce((acc, tx) => acc + (tx.fine || 0), 0).toLocaleString('id-ID')}
+                    </h3>
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-[#FAF6F0] border border-[#3D1E1E]/10 flex items-center justify-center text-green-600">
+                    <Coin className="w-5 h-5" weight="bold" />
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-[#FAF6F0]/50 border-b border-[#D3D3D3] text-[9px] font-mono font-bold uppercase tracking-wider text-[#6E6E6E]">
-                    <th className="py-3.5 px-6">ID Transaksi</th>
-                    <th className="py-3.5 px-6">Anggota</th>
-                    <th className="py-3.5 px-6">Buku</th>
-                    <th className="py-3.5 px-6">Tanggal Pinjam</th>
-                    <th className="py-3.5 px-6">Tanggal Kembali</th>
-                    <th className="py-3.5 px-6">Status</th>
-                    <th className="py-3.5 px-6 text-right">Denda Terbayar</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#F0F0F0] text-xs">
-                  {filtered.length === 0 ? (
-                    <tr>
-                      <td colSpan={7} className="py-8 text-center text-[#9E9E9E] font-medium font-sans">
-                        Tidak ada sirkulasi peminjaman di rentang tanggal ini.
-                      </td>
-                    </tr>
-                  ) : (
-                    filtered.map(tx => (
-                      <tr key={tx.id} className="hover:bg-[#FAF9F9]/50 transition-colors">
-                        <td className="py-3.5 px-6 font-mono font-bold text-[#1B1B1B]">{tx.id}</td>
-                        <td className="py-3.5 px-6">
-                          <p className="font-bold text-[#1B1B1B]">{members.find(m => m.id === tx.userId)?.name || tx.userId}</p>
-                          <p className="text-[9px] font-mono text-[#6E6E6E]">{tx.userId}</p>
-                        </td>
-                        <td className="py-3.5 px-6 font-bold text-[#1B1B1B]">{tx.bookTitle}</td>
-                        <td className="py-3.5 px-6 font-mono text-[10px] text-[#6E6E6E]">{tx.borrowDate}</td>
-                        <td className="py-3.5 px-6 font-mono text-[10px] text-[#6E6E6E]">{tx.returnDate || '-'}</td>
-                        <td className="py-3.5 px-6">
-                          <span className={`inline-block rounded-full text-[9px] font-bold tracking-wider px-2 py-0.5 uppercase ${
-                            tx.status === 'returned'
-                              ? 'bg-green-50 border border-green-200 text-green-600'
-                              : 'bg-blue-50 border border-blue-200 text-blue-600'
-                          }`}>
-                            {tx.status === 'returned' ? 'Kembali' : 'Dipinjam'}
-                          </span>
-                        </td>
-                        <td className="py-3.5 px-6 text-right font-mono font-bold">
-                          {tx.fine && tx.fine > 0 ? (
-                            <span className="text-[#FA0F00]">Rp {tx.fine.toLocaleString('id-ID')}</span>
-                          ) : (
-                            <span className="text-[#9E9E9E]">Rp 0</span>
-                          )}
-                        </td>
+
+            {/* Filter Date Range Form */}
+            <div className="bg-white border border-[#D3D3D3] rounded-lg p-6 mb-8 text-left text-xs">
+              <div className="flex items-center gap-2 mb-4 pb-2 border-b border-[#F0F0F0]">
+                <Funnel className="w-4 h-4 text-[#FA0F00]" />
+                <h4 className="font-bold text-sm text-[#1B1B1B] uppercase tracking-wider">Filter Periode Laporan</h4>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 items-end">
+                <div className="space-y-1">
+                  <label className="font-bold text-[#6E6E6E] tracking-wider uppercase block">Tanggal Mulai</label>
+                  <input
+                    type="date"
+                    value={reportStartDate}
+                    onChange={(e) => setReportStartDate(e.target.value)}
+                    className="w-full bg-[#F5F5F5] border border-[#D3D3D3] rounded-md px-3 py-2 text-xs text-[#1B1B1B] focus:outline-none focus:border-[#FA0F00] focus:bg-white transition-all"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="font-bold text-[#6E6E6E] tracking-wider uppercase block">Tanggal Akhir</label>
+                  <input
+                    type="date"
+                    value={reportEndDate}
+                    onChange={(e) => setReportEndDate(e.target.value)}
+                    className="w-full bg-[#F5F5F5] border border-[#D3D3D3] rounded-md px-3 py-2 text-xs text-[#1B1B1B] focus:outline-none focus:border-[#FA0F00] focus:bg-white transition-all"
+                  />
+                </div>
+                <div>
+                  <button
+                    onClick={() => {
+                      setReportStartDate('');
+                      setReportEndDate('');
+                    }}
+                    className="w-full bg-[#FAF6F0] hover:bg-[#EAE3D2] border border-[#3D1E1E]/15 text-[#3D1E1E] font-semibold py-2.5 rounded-md shadow-sm transition-all text-xs font-mono uppercase tracking-wider cursor-pointer"
+                  >
+                    Reset Filter
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Filtered List Container */}
+            <div className="border border-[#3D1E1E]/10 bg-[#3D1E1E]/5 p-2 rounded-2xl">
+              <div className="bg-white border border-[#3D1E1E]/15 rounded-[calc(1rem-2px)] overflow-hidden">
+                <div className="px-6 py-4 bg-[#FAF6F0] border-b border-[#D3D3D3] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                  <h3 className="font-display font-bold text-base text-[#3D1E1E]">Log Sirkulasi Terfilter</h3>
+                  
+                  {/* Filter stats summary */}
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#6E6E6E] bg-[#3D1E1E]/5 px-2.5 py-1 rounded">
+                    Peminjaman: {filtered.length} | Denda: Rp {totalFineInPeriod.toLocaleString('id-ID')}
+                  </span>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse">
+                    <thead>
+                      <tr className="bg-[#FAF6F0]/50 border-b border-[#D3D3D3] text-[9px] font-mono font-bold uppercase tracking-wider text-[#6E6E6E]">
+                        <th className="py-3.5 px-6">ID Transaksi</th>
+                        <th className="py-3.5 px-6">Anggota</th>
+                        <th className="py-3.5 px-6">Buku</th>
+                        <th className="py-3.5 px-6">Tanggal Pinjam</th>
+                        <th className="py-3.5 px-6">Tanggal Kembali</th>
+                        <th className="py-3.5 px-6">Status</th>
+                        <th className="py-3.5 px-6 text-right">Denda Terbayar</th>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+                    </thead>
+                    <tbody className="divide-y divide-[#F0F0F0] text-xs">
+                      {filtered.length === 0 ? (
+                        <tr>
+                          <td colSpan={7} className="py-8 text-center text-[#9E9E9E] font-medium font-sans">
+                            Tidak ada sirkulasi peminjaman di rentang tanggal ini.
+                          </td>
+                        </tr>
+                      ) : (
+                        filtered.map(tx => (
+                          <tr key={tx.id} className="hover:bg-[#FAF9F9]/50 transition-colors">
+                            <td className="py-3.5 px-6 font-mono font-bold text-[#1B1B1B]">{tx.id}</td>
+                            <td className="py-3.5 px-6">
+                              <p className="font-bold text-[#1B1B1B]">{members.find(m => m.id === tx.userId)?.name || tx.userId}</p>
+                              <p className="text-[9px] font-mono text-[#6E6E6E]">{tx.userId}</p>
+                            </td>
+                            <td className="py-3.5 px-6 font-bold text-[#1B1B1B]">{tx.bookTitle}</td>
+                            <td className="py-3.5 px-6 font-mono text-[10px] text-[#6E6E6E]">{tx.borrowDate}</td>
+                            <td className="py-3.5 px-6 font-mono text-[10px] text-[#6E6E6E]">{tx.returnDate || '-'}</td>
+                            <td className="py-3.5 px-6">
+                              <span className={`inline-block rounded-full text-[9px] font-bold tracking-wider px-2 py-0.5 uppercase ${
+                                tx.status === 'returned'
+                                  ? 'bg-green-50 border border-green-200 text-green-600'
+                                  : 'bg-blue-50 border border-blue-200 text-blue-600'
+                              }`}>
+                                {tx.status === 'returned' ? 'Kembali' : 'Dipinjam'}
+                              </span>
+                            </td>
+                            <td className="py-3.5 px-6 text-right font-mono font-bold">
+                              {tx.fine && tx.fine > 0 ? (
+                                <span className="text-[#FA0F00]">Rp {tx.fine.toLocaleString('id-ID')}</span>
+                              ) : (
+                                <span className="text-[#9E9E9E]">Rp 0</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="animate-in fade-in duration-200 text-left">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              
+              {/* Form Settings */}
+              <form onSubmit={handleSaveSettings} className="lg:col-span-8 bg-white border border-[#D3D3D3] rounded-xl p-8 shadow-sm space-y-8">
+                
+                {/* Section 1: Aturan Peminjaman */}
+                <div>
+                  <div className="flex items-center gap-2 mb-6 pb-2 border-b border-[#F0F0F0]">
+                    <Coin className="w-5 h-5 text-[#FA0F00]" />
+                    <h3 className="font-display font-bold text-base text-[#1B1B1B]">Aturan Sirkulasi & Denda</h3>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-[#6E6E6E] tracking-wider uppercase block">Denda Keterlambatan (Rupiah/Hari)</label>
+                      <input
+                        type="number"
+                        value={finePerDay}
+                        onChange={(e) => setFinePerDay(Number(e.target.value))}
+                        className="w-full bg-[#F5F5F5] border border-[#D3D3D3] rounded-lg px-4 py-2.5 text-sm text-[#1B1B1B] focus:outline-none focus:border-[#FA0F00] focus:bg-white transition-all font-medium"
+                        required
+                        min={0}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-[#6E6E6E] tracking-wider uppercase block">Durasi Maksimal Peminjaman (Hari)</label>
+                      <input
+                        type="number"
+                        value={maxBorrowDays}
+                        onChange={(e) => setMaxBorrowDays(Number(e.target.value))}
+                        className="w-full bg-[#F5F5F5] border border-[#D3D3D3] rounded-lg px-4 py-2.5 text-sm text-[#1B1B1B] focus:outline-none focus:border-[#FA0F00] focus:bg-white transition-all font-medium"
+                        required
+                        min={1}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 2: Profil Perpustakaan */}
+                <div>
+                  <div className="flex items-center gap-2 mb-6 pb-2 border-b border-[#F0F0F0]">
+                    <Info className="w-5 h-5 text-[#FA0F00]" />
+                    <h3 className="font-display font-bold text-base text-[#1B1B1B]">Profil Perpustakaan</h3>
+                  </div>
+
+                  <div className="space-y-6">
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-[#6E6E6E] tracking-wider uppercase block">Nama Perpustakaan</label>
+                      <input
+                        type="text"
+                        value={libraryName}
+                        onChange={(e) => setLibraryName(e.target.value)}
+                        className="w-full bg-[#F5F5F5] border border-[#D3D3D3] rounded-lg px-4 py-2.5 text-sm text-[#1B1B1B] focus:outline-none focus:border-[#FA0F00] focus:bg-white transition-all font-medium"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-[#6E6E6E] tracking-wider uppercase block">Alamat Perpustakaan</label>
+                      <textarea
+                        value={libraryAddress}
+                        onChange={(e) => setLibraryAddress(e.target.value)}
+                        className="w-full bg-[#F5F5F5] border border-[#D3D3D3] rounded-lg px-4 py-2.5 text-sm text-[#1B1B1B] focus:outline-none focus:border-[#FA0F00] focus:bg-white transition-all font-medium min-h-[80px]"
+                        required
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-[#6E6E6E] tracking-wider uppercase block">Nomor Telepon</label>
+                        <input
+                          type="text"
+                          value={libraryPhone}
+                          onChange={(e) => setLibraryPhone(e.target.value)}
+                          className="w-full bg-[#F5F5F5] border border-[#D3D3D3] rounded-lg px-4 py-2.5 text-sm text-[#1B1B1B] focus:outline-none focus:border-[#FA0F00] focus:bg-white transition-all font-medium"
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-bold text-[#6E6E6E] tracking-wider uppercase block">Email Resmi</label>
+                        <input
+                          type="email"
+                          value={libraryEmail}
+                          onChange={(e) => setLibraryEmail(e.target.value)}
+                          className="w-full bg-[#F5F5F5] border border-[#D3D3D3] rounded-lg px-4 py-2.5 text-sm text-[#1B1B1B] focus:outline-none focus:border-[#FA0F00] focus:bg-white transition-all font-medium"
+                          required
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Submit Action Button */}
+                <div className="pt-4 border-t border-[#F0F0F0] flex justify-end">
+                  <button
+                    type="submit"
+                    className="bg-[#FA0F00] hover:bg-[#E00D00] text-white font-semibold px-8 py-3 rounded-lg text-xs uppercase tracking-wider shadow-sm transition-all duration-130 btn-pressable cursor-pointer"
+                  >
+                    Simpan Pengaturan
+                  </button>
+                </div>
+              </form>
+
+              {/* Sidebar Maintenance Card */}
+              <div className="lg:col-span-4 space-y-6">
+                
+                {/* Card Reset Database */}
+                <div className="bg-white border border-[#D3D3D3] rounded-xl p-6 shadow-sm text-left">
+                  <div className="flex items-center gap-2 mb-4 pb-2 border-b border-[#F0F0F0]">
+                    <ShieldWarning className="w-5 h-5 text-[#FA0F00]" />
+                    <h3 className="font-display font-bold text-xs uppercase tracking-wider text-[#1B1B1B]">Pemeliharaan Sistem</h3>
+                  </div>
+                  <p className="text-xs text-[#6E6E6E] leading-relaxed mb-6 font-medium">
+                    Membersihkan seluruh log transaksi sirkulasi digital perpustakaan, data pesanan/RSVP, dan menyetel ulang daftar koleksi buku ke setelan bawaan. Tindakan ini tidak dapat dibatalkan.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleResetDatabase}
+                    className="w-full bg-white hover:bg-red-50 text-[#FA0F00] border border-red-200 hover:border-red-300 font-semibold py-3 rounded-lg text-xs uppercase tracking-wider shadow-sm transition-all duration-130 btn-pressable flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <ArrowCounterClockwise className="w-4 h-4" />
+                    Reset Database
+                  </button>
+                </div>
+
+                {/* Card System Info */}
+                <div className="bg-white border border-[#D3D3D3] rounded-xl p-6 shadow-sm text-left">
+                  <div className="flex items-center gap-2 mb-4 pb-2 border-b border-[#F0F0F0]">
+                    <Info className="w-5 h-5 text-blue-600" />
+                    <h3 className="font-display font-bold text-xs uppercase tracking-wider text-[#1B1B1B]">Informasi Sistem</h3>
+                  </div>
+                  <div className="space-y-3 font-mono text-[10px] text-[#6E6E6E]">
+                    <div className="flex justify-between">
+                      <span className="font-semibold">Versi Aplikasi:</span>
+                      <span>v1.2.0</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-semibold">DBMS Engine:</span>
+                      <span>MySQL 8.0</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-semibold">Dialect ORM:</span>
+                      <span>Sequelize v6</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-semibold">Server Host:</span>
+                      <span>Vercel Serverless</span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );

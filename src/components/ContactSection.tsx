@@ -1,6 +1,19 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 export const ContactSection: React.FC = () => {
+  const [address, setAddress] = useState('Jl Dharmawangsa Dalam,\nSurabaya 60286');
+  const [phone, setPhone] = useState('0812-1742-4813');
+  const [email, setEmail] = useState('info@atmalibrary.org');
+
+  useEffect(() => {
+    const savedAddress = localStorage.getItem('lib_library_address');
+    const savedPhone = localStorage.getItem('lib_library_phone');
+    const savedEmail = localStorage.getItem('lib_library_email');
+    if (savedAddress) setAddress(savedAddress);
+    if (savedPhone) setPhone(savedPhone);
+    if (savedEmail) setEmail(savedEmail);
+  }, []);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     alert('Pesan Anda telah terkirim. Terima kasih!');
@@ -27,13 +40,12 @@ export const ContactSection: React.FC = () => {
             <h3 className="font-display font-bold text-lg text-[#1B1B1B] mb-6 tracking-wide">
               Address
             </h3>
-            <p className="text-sm text-[#6E6E6E] leading-relaxed font-medium mb-6">
-              Jl Dharmawangsa Dalam, <br />
-              Surabaya 60286
+            <p className="text-sm text-[#6E6E6E] leading-relaxed font-medium mb-6 whitespace-pre-line">
+              {address}
             </p>
             <p className="text-sm text-[#6E6E6E] leading-relaxed font-medium">
-              Telp: 0812-1742-4813 <br />
-              Email: info@atmalibrary.org
+              Telp: {phone} <br />
+              Email: {email}
             </p>
           </div>
 

@@ -1,6 +1,21 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 export const LocationMap: React.FC = () => {
+  const [city, setCity] = useState('Surabaya, Indonesia');
+
+  useEffect(() => {
+    const savedAddress = localStorage.getItem('lib_library_address');
+    if (savedAddress) {
+      const parts = savedAddress.split(',');
+      if (parts.length > 1) {
+        // e.g. "Surabaya 60286"
+        setCity(parts[parts.length - 1].trim());
+      } else {
+        setCity(savedAddress);
+      }
+    }
+  }, []);
+
   return (
     <section className="w-full relative z-20 h-[450px] overflow-hidden font-sans">
       {/* OpenStreetMap iframe */}
@@ -23,7 +38,7 @@ export const LocationMap: React.FC = () => {
           ATMA LIBRARY
         </h4>
         <p className="text-[10px] font-mono font-bold text-[#6E6E6E]">
-          Surabaya, Indonesia
+          {city}
         </p>
         {/* Marker indicator triangle pointing down */}
         <div className="absolute bottom-[-6px] left-[20px] w-3 h-3 bg-white border-r border-b border-[#D3D3D3] rotate-45" />

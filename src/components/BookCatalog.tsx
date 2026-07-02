@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
 import { MagnifyingGlass, BookOpen, Clock, CalendarBlank, BookmarkSimple, Quotes, ArrowLeft } from '@phosphor-icons/react';
 import { mockDb } from '../data/mockDb';
@@ -140,6 +140,28 @@ export const BookCatalog: React.FC<BookCatalogProps> = ({
   const [actionFeedback, setActionFeedback] = useState<{ success?: boolean; message: string } | null>(null);
   const [isBorrowing, setIsBorrowing] = useState(false);
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
+
+  const [address, setAddress] = useState('Jl Dharmawangsa Dalam,\nSurabaya 60286');
+  const [phone, setPhone] = useState('0812-1742-4813');
+  const [email, setEmail] = useState('info@atmalibrary.org');
+  const [city, setCity] = useState('Surabaya, Indonesia');
+
+  useEffect(() => {
+    const savedAddress = localStorage.getItem('lib_library_address');
+    const savedPhone = localStorage.getItem('lib_library_phone');
+    const savedEmail = localStorage.getItem('lib_library_email');
+    if (savedAddress) {
+      setAddress(savedAddress);
+      const parts = savedAddress.split(',');
+      if (parts.length > 1) {
+        setCity(parts[parts.length - 1].trim());
+      } else {
+        setCity(savedAddress);
+      }
+    }
+    if (savedPhone) setPhone(savedPhone);
+    if (savedEmail) setEmail(savedEmail);
+  }, []);
 
   React.useEffect(() => {
     if (user) {
@@ -406,13 +428,12 @@ export const BookCatalog: React.FC<BookCatalogProps> = ({
                 <h3 className="font-display font-bold text-lg text-[#1B1B1B] mb-6 tracking-wide">
                   Address
                 </h3>
-                <p className="text-sm text-[#6E6E6E] leading-relaxed font-medium mb-6">
-                  Jl Dharmawangsa Dalam, <br />
-                  Surabaya 60286
+                <p className="text-sm text-[#6E6E6E] leading-relaxed font-medium mb-6 whitespace-pre-line">
+                  {address}
                 </p>
                 <p className="text-sm text-[#6E6E6E] leading-relaxed font-medium">
-                  Telp: 0812-1742-4813 <br />
-                  Email: info@atmalibrary.org
+                  Telp: {phone} <br />
+                  Email: {email}
                 </p>
               </div>
 
@@ -513,7 +534,7 @@ export const BookCatalog: React.FC<BookCatalogProps> = ({
               ATMA LIBRARY
             </h4>
             <p className="text-[10px] font-mono font-bold text-[#6E6E6E]">
-              Surabaya, Indonesia
+              {city}
             </p>
             {/* Marker indicator triangle pointing down */}
             <div className="absolute bottom-[-6px] left-[20px] w-3 h-3 bg-white border-r border-b border-[#D3D3D3] rotate-45" />

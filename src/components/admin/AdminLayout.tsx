@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   House, 
@@ -37,6 +37,12 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
   const [isManagementOpen, setIsManagementOpen] = useState(true);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [libName, setLibName] = useState('ATMA LIBRARY');
+
+  useEffect(() => {
+    const savedName = localStorage.getItem('lib_library_name');
+    if (savedName) setLibName(savedName.toUpperCase());
+  }, []);
 
   const notifications = [
     { id: 1, text: "Return verification request for 'The Coffee Shop Next Door'", time: "5 mins ago", unread: true },
@@ -115,7 +121,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({
             <Books className="w-4.5 h-4.5 text-white" weight="bold" />
           </div>
           <span className="font-sans font-extrabold text-lg tracking-[0.12em] text-[#1B1B1B]">
-            ATMA LIBRARY
+            {libName}
           </span>
         </div>
 
