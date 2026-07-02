@@ -4,6 +4,7 @@ import { MagnifyingGlass, BookOpen, Clock, CalendarBlank, BookmarkSimple, Quotes
 import { mockDb } from '../data/mockDb';
 import type { Book, Bookmark } from '../data/mockDb';
 import collectionsHeroImg from '../assets/library-collections-hero.png';
+import { getBookCover } from '../utils/bookCovers';
 
 interface BookCatalogProps {
   books: Book[];
@@ -66,7 +67,7 @@ const BookCard: React.FC<BookCardProps> = ({ book, isFeatured, idx, onClick, vie
           }`}>
             <motion.img
               style={{ y }}
-              src={`https://picsum.photos/seed/${book.coverSeed}/400/600`}
+              src={getBookCover(book.coverSeed)}
               alt={book.title}
               loading="lazy"
               className="w-full h-full object-cover scale-115 opacity-95 group-hover:scale-120 transition-transform duration-250"
@@ -674,7 +675,7 @@ export const BookCatalog: React.FC<BookCatalogProps> = ({
                   {/* Left image column */}
                   <div className="w-full md:w-56 aspect-[2/3] rounded-md overflow-hidden bg-[#F5F5F5] border border-[#D3D3D3] shrink-0 shadow-sm">
                     <img
-                      src={`https://picsum.photos/seed/${selectedBook.coverSeed}/400/600`}
+                      src={getBookCover(selectedBook.coverSeed)}
                       alt={selectedBook.title}
                       className="w-full h-full object-cover"
                     />

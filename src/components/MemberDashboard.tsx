@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Clock, CheckCircle, ArrowUUpLeft, BookOpen, Info, ShieldWarning, Users, Chair, BookmarkSimple, Sparkle } from '@phosphor-icons/react';
 import { mockDb } from '../data/mockDb';
+import { getBookCover } from '../utils/bookCovers';
 import type { BorrowRequest, Bookmark, Reservation, SpaceBooking, Book } from '../data/mockDb';
 
 interface MemberDashboardProps {
@@ -305,7 +306,7 @@ export const MemberDashboard: React.FC<MemberDashboardProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {bookmarkedBooks.map(book => (
                 <div key={book.id} className="adobe-card p-4 flex gap-4">
-                  <img src={`https://picsum.photos/seed/${book.coverSeed}/100/150`} alt={book.title} className="w-16 h-24 object-cover rounded" />
+                  <img src={getBookCover(book.coverSeed)} alt={book.title} className="w-16 h-24 object-cover rounded" />
                   <div className="text-left flex flex-col justify-center">
                     <span className="text-[9px] uppercase font-bold text-[#0265DC]">{book.author}</span>
                     <h4 className="font-display font-bold text-sm text-[#1B1B1B] line-clamp-2 mt-1">{book.title}</h4>
@@ -416,7 +417,7 @@ export const MemberDashboard: React.FC<MemberDashboardProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {recommendations.map((book) => (
               <div key={book.id} className="adobe-card p-5 text-left flex flex-col items-center">
-                <img src={`https://picsum.photos/seed/${book.coverSeed}/200/300`} alt={book.title} className="w-32 h-48 object-cover rounded shadow-md mb-4" />
+                <img src={getBookCover(book.coverSeed)} alt={book.title} className="w-32 h-48 object-cover rounded shadow-md mb-4" />
                 <span className="text-[10px] font-mono tracking-widest text-[#6E6E6E] uppercase block mb-1">
                   {book.author}
                 </span>

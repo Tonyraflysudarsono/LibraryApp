@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { TrendUp, Users, BookOpen, CalendarBlank, Coin } from '@phosphor-icons/react';
 import heroLibraryImg from '../assets/hero-library.png';
 import { ContactSection } from './ContactSection';
+import { getBookCover } from '../utils/bookCovers';
 import { LocationMap } from './LocationMap';
 import type { Book, LibraryEvent } from '../data/mockDb';
 
@@ -187,7 +188,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 {/* Book Cover Container with hover lift */}
                 <div className="relative w-full aspect-[3/4] bg-[#F5F5F5] border border-[#D3D3D3] rounded-sm overflow-hidden shadow-sm group-hover:shadow-md group-hover:translate-y-[-6px] transition-all duration-300 ease-out">
                   <img 
-                    src={`https://picsum.photos/seed/${book.coverSeed}/400/500`}
+                    src={getBookCover(book.coverSeed)}
                     alt={book.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
