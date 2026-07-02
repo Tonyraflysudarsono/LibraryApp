@@ -1,18 +1,18 @@
 const COVER_MAP: { [key: string]: string } = {
-  'normandesign': 'https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1442277527i/840.jpg',
-  'refactoring': 'https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1386920668i/351371.jpg',
-  'cleancode': 'https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1436202607i/3735293.jpg',
-  'sapiens': 'https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1595674533i/23692271.jpg',
-  'zerotoone': 'https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1630067394i/18050143.jpg',
-  'atomichabits': 'https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1655988390i/40121378.jpg',
-  'thinkingfast': 'https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1317793930i/11468377.jpg',
-  'leanstartup': 'https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1629999184i/10127019.jpg',
-  'startwithwhy': 'https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1360558233i/5271661.jpg',
-  'hobbit': 'https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1546071216i/5907.jpg',
-  'harrypotter': 'https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1474154022i/3.jpg',
-  'percyjackson': 'https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1400407761i/28187.jpg',
-  'educated': 'https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1506026635i/35133922.jpg',
-  'stevejobs': 'https://images-na.ssl-images-amazon.com/images/S/compressed.photo.goodreads.com/books/1511281625i/11084145.jpg'
+  'normandesign': 'https://covers.openlibrary.org/b/isbn/9780465050659-L.jpg',
+  'refactoring': 'https://covers.openlibrary.org/b/isbn/9780134757599-L.jpg',
+  'cleancode': 'https://covers.openlibrary.org/b/isbn/9780132350884-L.jpg',
+  'sapiens': 'https://covers.openlibrary.org/b/isbn/9780062316097-L.jpg',
+  'zerotoone': 'https://covers.openlibrary.org/b/isbn/9780804139298-L.jpg',
+  'atomichabits': 'https://covers.openlibrary.org/b/isbn/9780735211292-L.jpg',
+  'thinkingfast': 'https://covers.openlibrary.org/b/isbn/9780374275631-L.jpg',
+  'leanstartup': 'https://covers.openlibrary.org/b/isbn/9780307887894-L.jpg',
+  'startwithwhy': 'https://covers.openlibrary.org/b/isbn/9781591846444-L.jpg',
+  'hobbit': 'https://covers.openlibrary.org/b/isbn/9780547928227-L.jpg',
+  'harrypotter': 'https://covers.openlibrary.org/b/isbn/9780590353427-L.jpg',
+  'percyjackson': 'https://covers.openlibrary.org/b/isbn/9780786838653-L.jpg',
+  'educated': 'https://covers.openlibrary.org/b/isbn/9780399590504-L.jpg',
+  'stevejobs': 'https://covers.openlibrary.org/b/isbn/9781451648539-L.jpg'
 };
 
 /**
