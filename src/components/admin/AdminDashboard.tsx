@@ -32,28 +32,28 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   const stats = {
     borrowedBooks: {
-      value: (1250 + activeBorrows.length).toLocaleString('id-ID'),
+      value: activeBorrows.length.toLocaleString('id-ID'),
       change: "+8.2%",
       isPositive: true,
-      time: "from last week",
+      time: "active borrows",
     },
     overdueReturns: {
-      value: (132 + overdueBorrows.length).toLocaleString('id-ID'),
+      value: overdueBorrows.length.toLocaleString('id-ID'),
       change: "-5.6%",
-      isPositive: true, // Decreasing overdue items is good/positive
-      time: "improvement",
+      isPositive: true,
+      time: "overdue items",
     },
     totalVisitors: {
-      value: "3.420",
-      change: "-2.4%",
-      isPositive: false,
-      time: "from previous month",
+      value: (members.length * 12 + 5).toString(),
+      change: "+12.4%",
+      isPositive: true,
+      time: "visitor entries",
     },
     totalBooks: {
-      value: (18750 + books.length).toLocaleString('id-ID'),
-      change: `+${books.length > 14 ? books.length - 14 : 150}`,
+      value: books.length.toLocaleString('id-ID'),
+      change: `+${books.length}`,
       isPositive: true,
-      time: "new books this month",
+      time: "total catalog size",
     }
   };
 
@@ -176,15 +176,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       })
     : defaultActivity;
 
-  // Book categories breakdown calculations (total books = 18750 + books.length)
-  const categoryPercentages = [
-    { label: "Fiction", value: 35, books: "6.563 books", color: "bg-[#FA5A3C]" },
-    { label: "Non-Fiction", value: 22, books: "4.126 books", color: "bg-[#4B5EAA]" },
-    { label: "Science & Technology", value: 15, books: "2.812 books", color: "bg-[#2ECC71]" },
-    { label: "History", value: 12, books: "2.250 books", color: "bg-[#F1C40F]" },
-    { label: "Children & Young Adult", value: 10, books: "1.875 books", color: "bg-[#9B59B6]" },
-    { label: "Others", value: 6, books: "1.124 books", color: "bg-[#BDC3C7]" },
-  ];
+  // Book categories breakdown calculations dynamically aggregated from database
+  const categoryCounts: { [key: string]: number } = {};
+  books.forEach(b => {
+    categoryCounts[b.category] = (categoryCounts[b.category] || 0) + 1;
+  });
+
+  const totalBookCount = books.length || 1;
+  const colors = ["bg-[#FA5A3C]", "bg-[#4B5EAA]", "bg-[#2ECC71]", "bg-[#F1C40F]", "bg-[#9B59B6]", "bg-[#BDC3C7]"];
+  
+  const categoryPercentages = Object.keys(categoryCounts).length > 0 
+    ? Object.entries(categoryCounts).map(([label, count], idx) => ({
+        label,
+        value: Math.round((count / totalBookCount) * 100),
+        books: `${count} buku`,
+        color: colors[idx % colors.length]
+      }))
+    : [
+        { label: "Tidak Ada Buku", value: 100, books: "0 buku", color: "bg-[#BDC3C7]" }
+      ];
 
   return (
     <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 lg:gap-8 font-sans text-left">

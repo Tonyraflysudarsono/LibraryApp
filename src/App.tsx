@@ -570,6 +570,7 @@ function App() {
               <MemberDashboard
                 user={user}
                 borrows={borrows}
+                books={books}
                 onReturnRequest={handleReturnRequest}
                 onBrowseBooks={() => setCurrentView('catalog')}
                 refreshBorrows={fetchData}
@@ -615,14 +616,17 @@ function App() {
       <QRScannerModal
         isOpen={isQROpen}
         onClose={() => setIsQROpen(false)}
-        onScanSuccess={() => {
+        onScanSuccess={async () => {
           if (user) {
-            const res = mockDb.borrowBook('6', user.id); 
-            if (res.success) {
-              alert('Self-Checkout Berhasil: Atomic Habits dipinjam.');
-              fetchData();
-            } else {
-              alert('Self-Checkout Gagal: ' + res.message);
+            try {
+              const targetBook = books.find(b => b.title.toLowerCase().includes('atomic habits'));
+              const bookDbId = targetBook ? targetBook.dbId : 6;
+              
+              await peminjamanService.createTransaction(user.id, bookDbId);
+              alert('Self-Checkout Berhasil: Buku Atomic Habits berhasil dipinjam!');
+              await fetchData();
+            } catch (err: any) {
+              alert('Self-Checkout Gagal: ' + (err.response?.data?.message || err.message));
             }
           }
         }}

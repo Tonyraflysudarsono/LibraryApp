@@ -7,6 +7,7 @@ import type { BorrowRequest, Bookmark, Reservation, SpaceBooking, Book } from '.
 interface MemberDashboardProps {
   user: { name: string; id: string } | null;
   borrows: BorrowRequest[];
+  books: Book[]; // Real books from the database
   onReturnRequest: (borrowId: string) => Promise<{ success: boolean; message: string }> | any;
   onBrowseBooks: () => void;
   refreshBorrows: () => void;
@@ -15,6 +16,7 @@ interface MemberDashboardProps {
 export const MemberDashboard: React.FC<MemberDashboardProps> = ({
   user,
   borrows,
+  books,
   onReturnRequest,
   onBrowseBooks,
   refreshBorrows
@@ -29,7 +31,7 @@ export const MemberDashboard: React.FC<MemberDashboardProps> = ({
   const [recommendations, setRecommendations] = useState<Book[]>([]);
 
   // We need to fetch books to join with bookmarks
-  const allBooks = mockDb.getBooks();
+  const allBooks = books;
 
   React.useEffect(() => {
     if (user) {
